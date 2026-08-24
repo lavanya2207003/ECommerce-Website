@@ -48,9 +48,13 @@ app.use("/api/products", productRoutes);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Payment API: http://localhost:${PORT}/api/payment`);
-  console.log(`Admin API: http://localhost:${PORT}/api/admin`);
-  console.log(`Razorpay Test Mode credentials loaded: ${process.env.RAZORPAY_KEY_ID?.startsWith("rzp_test_") ? "yes" : "no"}`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(`Payment API: http://localhost:${PORT}/api/payment`);
+    console.log(`Admin API: http://localhost:${PORT}/api/admin`);
+    console.log(`Razorpay Test Mode credentials loaded: ${process.env.RAZORPAY_KEY_ID?.startsWith("rzp_test_") ? "yes" : "no"}`);
+  });
+}
+
+module.exports = app;
