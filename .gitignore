@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+react-app/server/
 
 # Build output
 dist/
@@ -9,10 +10,14 @@ build/
 .env
 .env.local
 .env.*.local
+backend/.env
+react-app/.env
 
-# Logs
+# Logs & temp files
 *.log
+*.err
 npm-debug.log*
+backend/backend.err
 
 # OS
 .DS_Store

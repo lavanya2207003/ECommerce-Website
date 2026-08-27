@@ -70,29 +70,63 @@ const sampleCustomers = [
   { name: "Ram", email: "Ram@example.com", phone: "9876543214", total_orders: 4, total_spent: 12999, registration_date: new Date("2025-09-18") },
 ];
 
-async function seed() {
+async function seed({ forceAdmin = false } = {}) {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    const uri = process.env.MONGODB_URI || process.env.MONGO_URI;
+    if (!uri) {
+      console.error("No MongoDB URI configured. Set MONGODB_URI or MONGO_URI in backend/.env");
+      process.exit(1);
+    }
+    const connectOptions = {};
+    if (uri.startsWith("mongodb://") && !uri.startsWith("mongodb+srv://")) {
+      connectOptions.tls = true;
+      connectOptions.tlsAllowInvalidCertificates = true;
+    }
+    await mongoose.connect(uri, connectOptions);
     console.log("Connected to MongoDB");
 
-    await Admin.deleteMany({});
-    await Product.deleteMany({});
-    await Customer.deleteMany({});
+    // Admin: create only if none exists (never wipe existing admins)
+    const adminCount = await Admin.countDocuments();
+    if (adminCount === 0 || forceAdmin) {
+      const admin = new Admin({
+        name: "LayaStore Admin",
+        email: "admin@layastore.com",
+        password: "LayaStore@2026",
+        role: "super_admin",
+      });
+      await admin.save();
+      console.log("Admin created: admin@layastore.com / LayaStore@2026");
+    } else {
+      console.log("Admin already exists, skipping admin creation.");
+    }
 
-    const admin = new Admin({
-      name: "LayaStore Admin",
-      email: "admin@layastore.com",
-      password: "LayaStore@2026",
-      role: "super_admin",
-    });
-    await admin.save();
-    console.log("Admin created: admin@layastore.com / LayaStore@2026");
+    // Products: upsert by sku (no deletion, no duplicates)
+    let inserted = 0;
+    let updated = 0;
+    for (const p of sampleProducts) {
+      const result = await Product.findOneAndUpdate(
+        { sku: p.sku },
+        { $set: p },
+        { upsert: true, setDefaultsOnInsert: true, new: true }
+      );
+      if (result.isNew) inserted++;
+      else updated++;
+    }
+    console.log(`Products: ${inserted} inserted, ${updated} already present (total ${sampleProducts.length})`);
 
-    await Product.insertMany(sampleProducts);
-    console.log(`${sampleProducts.length} products seeded`);
-
-    await Customer.insertMany(sampleCustomers);
-    console.log(`${sampleCustomers.length} customers seeded`);
+    // Customers: upsert by email (never delete existing)
+    let cInserted = 0;
+    let cUpdated = 0;
+    for (const c of sampleCustomers) {
+      const existing = await Customer.findOne({ email: c.email.toLowerCase() });
+      if (!existing) {
+        await Customer.create(c);
+        cInserted++;
+      } else {
+        cUpdated++;
+      }
+    }
+    console.log(`Customers: ${cInserted} inserted, ${cUpdated} already present (total ${sampleCustomers.length})`);
 
     console.log("\nSeed completed successfully!");
     console.log("Admin Login: admin@layastore.com / LayaStore@2026");
@@ -103,4 +137,5 @@ async function seed() {
   }
 }
 
-seed();
+const forceAdmin = process.argv.includes("--admin");
+seed({ forceAdmin });

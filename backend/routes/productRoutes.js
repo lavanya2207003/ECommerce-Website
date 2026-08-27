@@ -5,7 +5,7 @@ const Product = require("../models/Product");
 // GET /api/products - Public: get all active products
 router.get("/", async (req, res) => {
   try {
-    const { search, category, sort, minPrice, maxPrice, featured, badge, page = 1, limit = 50 } = req.query;
+    const { search, category, sort, minPrice, maxPrice, featured, badge, page = 1, limit = 500 } = req.query;
     const query = { is_active: true };
 
     if (search) {
@@ -61,6 +61,19 @@ router.get("/categories", async (req, res) => {
   try {
     const categories = await Product.distinct("category", { is_active: true });
     res.json({ categories });
+  } catch (error) {
+    res.status(500).json({ message: "Server error." });
+  }
+});
+
+// GET /api/products/category/:category - Public: products by category
+router.get("/category/:category", async (req, res) => {
+  try {
+    const products = await Product.find({
+      category: req.params.category.toLowerCase(),
+      is_active: true,
+    }).sort({ createdAt: -1 });
+    res.json({ products, total: products.length });
   } catch (error) {
     res.status(500).json({ message: "Server error." });
   }

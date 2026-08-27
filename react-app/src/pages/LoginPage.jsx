@@ -22,7 +22,7 @@ export default function LoginPage() {
       const res = await fetch(`${API_BASE}/api/customer/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
@@ -34,6 +34,7 @@ export default function LoginPage() {
       }
 
       localStorage.setItem('user', JSON.stringify(data.customer));
+      if (data.token) localStorage.setItem('userToken', data.token);
       navigate('/');
     } catch (err) {
       setError('Unable to connect. Please try again later.');

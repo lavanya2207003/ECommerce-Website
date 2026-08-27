@@ -41,9 +41,13 @@ export function CuratedPage({ type }) {
 
   const data = useMemo(() => {
     if (type === 'new') {
-      return [...products].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 12);
+      const flagged = products.filter(p => p.badge === 'New');
+      const base = flagged.length ? flagged : [...products].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      return base.slice(0, 12);
     }
-    return [...products].sort((a, b) => (b.sold_count || 0) - (a.sold_count || 0)).slice(0, 12);
+    const flagged = products.filter(p => p.badge === 'Best Seller');
+    const base = flagged.length ? flagged : [...products].sort((a, b) => (b.sold_count || 0) - (a.sold_count || 0));
+    return base.slice(0, 12);
   }, [products, type]);
 
   return (

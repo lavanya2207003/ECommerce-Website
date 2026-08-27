@@ -13,6 +13,7 @@ const adminCustomerRoutes = require("./routes/adminCustomerRoutes");
 const adminDashboardRoutes = require("./routes/adminDashboardRoutes");
 const adminPaymentRoutes = require("./routes/adminPaymentRoutes");
 const customerAuthRoutes = require("./routes/customerAuthRoutes");
+const orderRoutes = require("./routes/orderRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
 const productRoutes = require("./routes/productRoutes");
 
@@ -20,7 +21,24 @@ connectDB();
 
 const app = express();
 
-app.use(cors());
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
+        callback(null, true);
+      } else {
+        callback(null, true);
+      }
+    },
+    credentials: true,
+  })
+);
 app.use(express.json({ limit: "10mb" }));
 
 app.use((req, res, next) => {
@@ -34,9 +52,20 @@ app.get("/", (req, res) => {
   res.json({ message: "Laya Store API is running" });
 });
 
+app.get("/api/health", (req, res) => {
+  const ready = require("mongoose").connection.readyState === 1;
+  res.json({
+    success: true,
+    message: "LayaStore API is running",
+    mongodb: ready ? "connected" : "disconnected",
+    timestamp: new Date().toISOString(),
+  });
+});
+
 app.use("/api/payment", paymentRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/customer/auth", customerAuthRoutes);
+app.use("/api/orders", orderRoutes);
 app.use("/api/admin/auth", adminAuthRoutes);
 app.use("/api/admin/products", adminProductRoutes);
 app.use("/api/admin/orders", adminOrderRoutes);
