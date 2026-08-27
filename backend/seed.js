@@ -82,6 +82,9 @@ async function seed({ forceAdmin = false } = {}) {
       connectOptions.tls = true;
       connectOptions.tlsAllowInvalidCertificates = true;
     }
+    if (!uri.includes("/laya_store")) {
+      connectOptions.dbName = "laya_store";
+    }
     await mongoose.connect(uri, connectOptions);
     console.log("Connected to MongoDB");
 

@@ -46,6 +46,10 @@ exports.login = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error("[admin:login] error:", error.message);
+    if (error.name === "MongooseError" || error.message.includes("Mongo")) {
+      return res.status(503).json({ message: "Authentication service temporarily unavailable. Please try again." });
+    }
     res.status(500).json({ message: "Server error during login." });
   }
 };

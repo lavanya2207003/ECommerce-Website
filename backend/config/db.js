@@ -16,6 +16,11 @@ const connectDB = async () => {
       options.tlsAllowInvalidCertificates = true;
     }
 
+    // Ensure we always use the laya_store database even if URI omits DB name (defaults to 'test')
+    if (!uri.includes("/laya_store")) {
+      options.dbName = "laya_store";
+    }
+
     const conn = await mongoose.connect(uri, options);
     console.log("MongoDB connected successfully");
     console.log(`MongoDB host: ${conn.connection.host}`);

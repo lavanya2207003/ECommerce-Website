@@ -9,7 +9,11 @@ build/
 # Environment variables (never commit secrets)
 .env
 .env.local
+.env.*
 .env.*.local
+!.env.example
+!backend/.env.example
+!react-app/.env.example
 backend/.env
 react-app/.env
 
