@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "installCommand": "npm install && cd backend && npm install && cd ../react-app && npm install",
-  "buildCommand": "cd react-app && node_modules/.bin/vite build",
+  "buildCommand": "cd react-app && npx vite build",
   "outputDirectory": "react-app/dist",
   "framework": "vite",
   "functions": {
