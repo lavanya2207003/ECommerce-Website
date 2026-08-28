@@ -1,12 +1,19 @@
 const mongoose = require("mongoose");
 
+let cached = global._mongooseCache;
+if (!cached) {
+  cached = global._mongooseCache = { conn: null, promise: null };
+}
+
 const connectDB = async () => {
+  if (cached.conn) return cached.conn;
+
   const uri = process.env.MONGODB_URI || process.env.MONGO_URI;
   if (!uri) {
-    console.error("No MongoDB URI configured. Set MONGODB_URI in backend/.env");
-    process.exit(1);
+    throw new Error("No MongoDB URI configured. Set MONGODB_URI in environment variables.");
   }
-  try {
+
+  if (!cached.promise) {
     const options = {
       serverSelectionTimeoutMS: 10000,
     };
@@ -16,29 +23,27 @@ const connectDB = async () => {
       options.tlsAllowInvalidCertificates = true;
     }
 
-    // Ensure we always use the laya_store database even if URI omits DB name (defaults to 'test')
     if (!uri.includes("/laya_store")) {
       options.dbName = "laya_store";
     }
 
-    const conn = await mongoose.connect(uri, options);
-    console.log("MongoDB connected successfully");
-    console.log(`MongoDB host: ${conn.connection.host}`);
-    console.log(`MongoDB database: ${conn.connection.name}`);
-
-    mongoose.connection.on("disconnected", () => {
-      console.warn("MongoDB disconnected");
+    cached.promise = mongoose.connect(uri, options).then((conn) => {
+      console.log("MongoDB connected successfully");
+      console.log(`MongoDB host: ${conn.connection.host}`);
+      console.log(`MongoDB database: ${conn.connection.name}`);
+      return conn;
     });
-    mongoose.connection.on("error", (err) => {
-      console.error("MongoDB connection error:", err.message);
-    });
-
-    return conn;
-  } catch (error) {
-    console.error("MongoDB connection failed:", error.message);
-    console.error("Check MONGODB_URI, Atlas IP whitelist, and network.");
-    process.exit(1);
   }
+
+  try {
+    cached.conn = await cached.promise;
+  } catch (error) {
+    cached.promise = null;
+    console.error("MongoDB connection failed:", error.message);
+    throw error;
+  }
+
+  return cached.conn;
 };
 
 module.exports = connectDB;

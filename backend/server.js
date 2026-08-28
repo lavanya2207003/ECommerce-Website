@@ -17,7 +17,9 @@ const orderRoutes = require("./routes/orderRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
 const productRoutes = require("./routes/productRoutes");
 
-connectDB();
+connectDB().catch((err) => {
+  console.error("Startup MongoDB error:", err.message);
+});
 
 const app = express();
 
