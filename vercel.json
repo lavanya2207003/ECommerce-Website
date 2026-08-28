@@ -1,8 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "npm install && npm install --prefix backend && npm install --prefix react-app",
-  "buildCommand": "npm run build --prefix react-app",
-  "outputDirectory": "react-app/dist",
+  "installCommand": "npm install && npm install --prefix backend && npm install --prefix react-app/react-app",
+  "buildCommand": "npm run build --prefix react-app/react-app",
+  "outputDirectory": "react-app/react-app/dist",
   "framework": "vite",
   "functions": {
     "api/index.js": {
