@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+react-app/server/
+
+# Build output
+dist/
+build/
+
+# Environment variables (never commit secrets)
+.env
+.env.local
+.env.*
+.env.*.local
+!.env.example
+!backend/.env.example
+!react-app/.env.example
+backend/.env
+react-app/.env
+
+# Logs & temp files
+*.log
+*.err
+npm-debug.log*
+backend/backend.err
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Vite transient config backups
+*.timestamp-*.mjs
