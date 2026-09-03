@@ -137,12 +137,16 @@
     }
     .top-bar {
       @apply bg-gradient-to-r from-purple-600 to-pink-500 text-white text-center text-xs py-2 tracking-widest;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .navbar {
       @apply flex items-center px-4 py-3 max-w-7xl mx-auto;
       gap: 0;
     }
     .navbar > * { flex-shrink: 0; min-width: 0; }
+    .icons { flex-shrink: 1; }
 
     /* Logo */
     .logo {
@@ -167,8 +171,10 @@
 
     /* Action icons */
     .icons {
-      @apply flex items-center shrink-0 ml-auto;
+      @apply flex items-center ml-auto;
       gap: 0;
+      flex-shrink: 1;
+      min-width: 0;
     }
     .icons a {
       @apply text-gray-600 hover:text-purple-700 transition-colors relative;
@@ -233,8 +239,8 @@
        SMALL MOBILE ≤480px: tighter
        ═══════════════════════════════════════════════════════ */
     @media (max-width: 480px) {
-      .navbar { @apply px-3 py-2.5; gap: 8px; }
-      .icons { gap: 8px; }
+      .navbar { @apply px-3 py-2.5; gap: 6px; }
+      .icons { gap: 6px; }
       .icons a, .icons .icon-btn { @apply text-base; }
       .mobile-toggle { @apply text-lg; }
     }
@@ -243,10 +249,10 @@
        VERY SMALL ≤360px: tightest
        ═══════════════════════════════════════════════════════ */
     @media (max-width: 360px) {
-      .top-bar { @apply text-[10px] py-1.5 tracking-wider px-2; }
-      .navbar { @apply px-2.5 py-2; gap: 6px; overflow: hidden; }
-      .logo { @apply text-base min-w-0 shrink; }
-      .icons { gap: 6px; }
+      .top-bar { @apply text-[10px] py-1.5 px-2; letter-spacing: 0.03em; }
+      .navbar { @apply px-2 py-2; gap: 4px; }
+      .logo { @apply text-sm min-w-0 shrink; }
+      .icons { gap: 4px; }
       .icons a, .icons .icon-btn { @apply text-sm; }
       .mobile-toggle { @apply text-base; }
     }
