@@ -16,6 +16,7 @@ const customerAuthRoutes = require("./routes/customerAuthRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
 const productRoutes = require("./routes/productRoutes");
+const imageProxyRoutes = require("./routes/imageProxyRoutes");
 
 connectDB().catch((err) => {
   console.error("Startup MongoDB error:", err.message);
@@ -32,10 +33,10 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
+      if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(null, true);
+        callback(null, false);
       }
     },
     credentials: true,
@@ -65,6 +66,7 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use("/api/payment", paymentRoutes);
+app.use("/api/images", imageProxyRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/customer/auth", customerAuthRoutes);
 app.use("/api/orders", orderRoutes);

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { adminAPI } from "../services/api";
+import { getImageUrl } from "../../services/getImageUrl";
 
 export default function Inventory() {
   const [products, setProducts] = useState([]);
@@ -123,7 +124,7 @@ export default function Inventory() {
                     <td className="px-4 py-3 text-sm text-gray-500">{index + 1}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <img src={product.images?.[0] || "https://via.placeholder.com/40"} alt={product.name} className="w-10 h-10 rounded-lg object-cover" />
+                        <img src={getImageUrl(product.images?.[0]) || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect fill='%23f1f5f9' width='40' height='40' rx='4'/%3E%3C/svg%3E"} alt={product.name} className="w-10 h-10 rounded-lg object-cover" />
                         <div>
                           <p className="text-sm font-medium text-gray-900">{product.name}</p>
                           <p className="text-xs text-gray-500">{product.brand}</p>

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Logo from './Logo';
+import Icon, { BrandIcon } from './Icon';
 
 function BackToTop() {
   const [visible, setVisible] = useState(false);
@@ -11,18 +12,18 @@ function BackToTop() {
   }, []);
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
   if (!visible) return null;
-  return <button className="back-to-top" onClick={scrollToTop} aria-label="Back to top"><i className="fa-solid fa-chevron-up" /></button>;
+  return <button className="back-to-top" onClick={scrollToTop} aria-label="Back to top"><Icon name="chevron-up" /></button>;
 }
 
 const SOCIALS = [
-  ['fa-brands fa-instagram', 'https://instagram.com'],
-  ['fa-brands fa-facebook-f', 'https://facebook.com'],
-  ['fa-brands fa-twitter', 'https://twitter.com'],
-  ['fa-brands fa-pinterest-p', 'https://pinterest.com'],
-  ['fa-brands fa-youtube', 'https://youtube.com'],
+  ['instagram', 'https://instagram.com'],
+  ['facebook-f', 'https://facebook.com'],
+  ['twitter', 'https://twitter.com'],
+  ['pinterest-p', 'https://pinterest.com'],
+  ['youtube', 'https://youtube.com'],
 ];
 
-const PAYMENT_ICONS = ['fa-brands fa-cc-visa', 'fa-brands fa-cc-mastercard', 'fa-brands fa-cc-amex', 'fa-brands fa-cc-paypal', 'fa-brands fa-google-pay', 'fa-brands fa-apple-pay'];
+const PAYMENT_ICONS = ['cc-visa', 'cc-mastercard', 'cc-amex', 'cc-paypal', 'google-pay', 'apple-pay'];
 
 export default function Footer() {
   return <>
@@ -32,7 +33,7 @@ export default function Footer() {
           <Logo size="footer" link="/" />
           <p>Discover the latest fashion trends, accessories, and ethnic wear. Premium fashion curated for every occasion.</p>
           <div className="footer-social">
-            {SOCIALS.map(([icon, url]) => <a key={icon} href={url} target="_blank" rel="noopener noreferrer" aria-label={icon} className="footer-social-icon"><i className={icon} /></a>)}
+            {SOCIALS.map(([icon, url]) => <a key={icon} href={url} target="_blank" rel="noopener noreferrer" aria-label={icon} className="footer-social-icon"><BrandIcon name={icon} /></a>)}
           </div>
         </div>
         <div className="footer-section">
@@ -57,19 +58,19 @@ export default function Footer() {
             <li><Link to="/contact">Privacy Policy</Link></li>
           </ul>
           <Link to="/admin/login" className="footer-admin-btn">
-            <i className="fa-solid fa-lock" /> Admin Login
+            <Icon name="lock" /> Admin Login
           </Link>
         </div>
         <div className="footer-section">
           <h3>Contact Us</h3>
-          <p><i className="fa-solid fa-location-dot" /> Vellore, India</p>
-          <p><i className="fa-solid fa-phone" /> +91 9487303753</p>
-          <p><i className="fa-solid fa-envelope" /> support@layastore.com</p>
-          <p className="footer-timing"><i className="fa-solid fa-clock" /> Mon-Sat: 9AM - 9PM</p>
+          <p><Icon name="location-dot" /> Vellore, India</p>
+          <p><Icon name="phone" /> +91 9487303753</p>
+          <p><Icon name="envelope" /> support@layastore.com</p>
+          <p className="footer-timing"><Icon name="clock" /> Mon-Sat: 9AM - 9PM</p>
         </div>
       </div>
       <div className="footer-payments">
-        {PAYMENT_ICONS.map(icon => <i key={icon} className={icon} />)}
+        {PAYMENT_ICONS.map(icon => <BrandIcon key={icon} name={icon} />)}
       </div>
       <div className="footer-bottom">
         <p>© 2026 LAYASTORE. All Rights Reserved.</p>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { adminAPI } from "../services/api";
 import ProductForm from "../components/ProductForm";
+import { getImageUrl } from "../../services/getImageUrl";
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -175,7 +176,7 @@ export default function Products() {
                     <td className="px-4 py-3 text-sm text-gray-600">{(pagination.page - 1) * 10 + index + 1}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <img src={product.images?.[0] || "https://via.placeholder.com/40"} alt={product.name} className="w-10 h-10 rounded-lg object-cover" />
+                        <img src={getImageUrl(product.images?.[0]) || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect fill='%23f1f5f9' width='40' height='40' rx='4'/%3E%3C/svg%3E"} alt={product.name} className="w-10 h-10 rounded-lg object-cover" />
                         <div>
                           <p className="text-sm font-medium text-gray-900">{product.name}</p>
                           <p className="text-xs text-gray-500">{product.brand}</p>
@@ -244,7 +245,7 @@ export default function Products() {
                     <span className="text-xs font-medium text-gray-400 bg-gray-200 rounded px-1.5 py-0.5">#{(pagination.page - 1) * 10 + index + 1}</span>
                   </div>
                   <div className="flex gap-3">
-                    <img src={product.images?.[0] || "https://via.placeholder.com/60"} alt={product.name} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" />
+                    <img src={getImageUrl(product.images?.[0]) || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Crect fill='%23f1f5f9' width='60' height='60' rx='4'/%3E%3C/svg%3E"} alt={product.name} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">

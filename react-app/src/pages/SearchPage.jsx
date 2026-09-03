@@ -2,6 +2,7 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useProducts } from '../context/ProductContext';
 import ProductGrid from '../components/ProductGrid';
+import Icon from '../components/Icon';
 
 export default function SearchPage() {
   const { products, loading } = useProducts();
@@ -35,7 +36,7 @@ export default function SearchPage() {
       </div>
       <div className="search-page-body">
         <div className="search-page-input-wrap">
-          <i className="fa-solid fa-magnifying-glass" />
+          <Icon name="magnifying-glass" />
           <input
             ref={inputRef}
             type="text"
@@ -45,7 +46,7 @@ export default function SearchPage() {
           />
           {query && (
             <button className="search-page-clear" onClick={() => setQuery('')}>
-              <i className="fa-solid fa-xmark" />
+              <Icon name="xmark" />
             </button>
           )}
         </div>
@@ -61,7 +62,7 @@ export default function SearchPage() {
           )}
           {!loading && query.trim() && filtered.length === 0 && (
             <div className="search-page-empty">
-              <i className="fa-solid fa-magnifying-glass" />
+              <Icon name="magnifying-glass" />
               <h3>No products found</h3>
               <p>Try a different search term</p>
               <Link to="/shop" className="search-page-shop-btn">Browse All Products</Link>

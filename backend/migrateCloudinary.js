@@ -22,7 +22,12 @@ function getLocalFilePath(url) {
 
 async function migrateProductImages() {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    const uri = process.env.MONGODB_URI || process.env.MONGO_URI;
+    if (!uri) {
+      console.error("No MongoDB URI configured. Set MONGODB_URI or MONGO_URI in backend/.env");
+      process.exit(1);
+    }
+    await mongoose.connect(uri);
     console.log("Connected to MongoDB\n");
 
     const products = await Product.find({});

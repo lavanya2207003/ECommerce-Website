@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { adminAPI } from "../services/api";
+import { getImageUrl } from "../../services/getImageUrl";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -18,7 +19,7 @@ function validateFile(file) {
 function ImagePreview({ src, index, isMain, onRemove, onSetMain }) {
   return (
     <div className={`relative group rounded-lg overflow-hidden border-2 ${isMain ? "border-red-500" : "border-gray-200"}`}>
-      <img src={src} alt={`Preview ${index + 1}`} className="w-full h-28 object-cover" />
+      <img src={getImageUrl(src)} alt={`Preview ${index + 1}`} className="w-full h-28 object-cover" />
       {isMain && (
         <span className="absolute top-1 left-1 px-1.5 py-0.5 bg-red-600 text-white text-[10px] font-bold rounded">Main</span>
       )}

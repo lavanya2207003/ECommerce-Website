@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
 import { CLOTHING_CATEGORIES, NON_CLOTHING_CATEGORIES } from '../data';
+import Icon from './Icon';
+import ImageWithFallback from './ImageWithFallback';
 
 const SIZE_GUIDE_DATA = {
   name: "Women's Clothing",
@@ -73,22 +75,22 @@ export default function QuickViewModal() {
           <button className="modal-close" onClick={closeQuickView} aria-label="Close modal">{'\u00D7'}</button>
           <div className="modal-body">
             <div className="modal-image">
-              <img src={product.image} alt={product.name} />
+              <ImageWithFallback src={product.image} alt={product.name} />
               <button
                 className="absolute top-4 right-4 z-10 bg-white/90 backdrop-blur-md rounded-full p-2.5 shadow-md hover:scale-105 transition-all duration-200"
                 onClick={() => toggleWishlist(product.id)}
                 aria-label="Toggle wishlist"
               >
-                <i className={`fa-${inWishlist ? 'solid' : 'regular'} fa-heart ${inWishlist ? 'text-red-500' : 'text-slate-700'}`}></i>
+                <Icon name="heart" className={inWishlist ? 'text-red-500 fill-red-500' : 'text-slate-700'} />
               </button>
             </div>
             <div className="modal-details">
               {product.badge && <span className="modal-badge">{product.badge}</span>}
               <h2>{product.name}</h2>
               <div className="modal-rating">
-                <i className="fa-solid fa-star" /><i className="fa-solid fa-star" />
-                <i className="fa-solid fa-star" /><i className="fa-solid fa-star" />
-                <i className="fa-solid fa-star-half-alt" />
+                <Icon name="star" /><Icon name="star" />
+                <Icon name="star" /><Icon name="star" />
+                <Icon name="star" />
                 <span>4.5 (128 reviews)</span>
               </div>
               <p className="modal-desc">{product.description}</p>
@@ -122,24 +124,24 @@ export default function QuickViewModal() {
 
               <div className={`modal-actions-row ${!shouldShowSizeGuide ? 'modal-actions-row--no-sizeguide' : ''}`}>
                 <button className="btn-action btn-addtocart" onClick={handleAddToCart}>
-                  <i className="fa-solid fa-bag-shopping"></i> Add to Cart
+                  <Icon name="bag-shopping" /> Add to Cart
                 </button>
                 <button className="btn-action btn-buynow" onClick={handleBuyNow}>
-                  <i className="fa-solid fa-bolt"></i> Buy Now
+                  <Icon name="bolt" /> Buy Now
                 </button>
                 {shouldShowSizeGuide && (
                   <button className="btn-action btn-sizeguide" onClick={() => setShowSizeGuide(true)} aria-label="Size guide">
-                    <i className="fa-solid fa-ruler"></i><span> Size Guide</span>
+                    <Icon name="ruler" /><span> Size Guide</span>
                   </button>
                 )}
               </div>
 
               <div className="modal-reviews">
-                <h4><i className="fa-solid fa-star" style={{color:'#d71920'}}></i> Customer Reviews (128)</h4>
+                <h4><Icon name="star" style={{color:'#d71920'}} /> Customer Reviews (128)</h4>
                 <div className="review-item">
                   <div className="review-header">
                     <strong>Priya S.</strong>
-                    <span><i className="fa-solid fa-star"></i><i className="fa-solid fa-star"></i><i className="fa-solid fa-star"></i><i className="fa-solid fa-star"></i><i className="fa-solid fa-star"></i></span>
+                    <span><Icon name="star" /><Icon name="star" /><Icon name="star" /><Icon name="star" /><Icon name="star" /></span>
                     <span className="review-date">2 weeks ago</span>
                   </div>
                   <p>Absolutely love this! The quality exceeded my expectations.</p>
@@ -147,7 +149,7 @@ export default function QuickViewModal() {
                 <div className="review-item">
                   <div className="review-header">
                     <strong>Ananya M.</strong>
-                    <span><i className="fa-solid fa-star"></i><i className="fa-solid fa-star"></i><i className="fa-solid fa-star"></i><i className="fa-solid fa-star"></i><i className="fa-regular fa-star"></i></span>
+                    <span><Icon name="star" /><Icon name="star" /><Icon name="star" /><Icon name="star" /><Icon name="star" /></span>
                     <span className="review-date">1 month ago</span>
                   </div>
                   <p>Great product, fits true to size. Would recommend!</p>
@@ -168,7 +170,7 @@ export default function QuickViewModal() {
               <div className="size-guide-illustration">
                 {['Bust', 'Waist', 'Hips'].map(m => (
                   <div className="measure-point" key={m}>
-                    <i className={`fa-solid fa-${m === 'Bust' ? 'chess-queen' : m === 'Waist' ? 'circle' : 'vector-square'}`}></i>
+                    <Icon name={m === 'Bust' ? 'gem' : m === 'Waist' ? 'circle' : 'box'} />
                     <span>{m}</span>
                     <small>Measure around the fullest part</small>
                   </div>
@@ -197,7 +199,7 @@ export default function QuickViewModal() {
                 </table>
               </div>
               <div className="size-tip">
-                <i className="fa-solid fa-lightbulb"></i>
+                <Icon name="lightbulb" />
                 <span>Tip: If your measurements fall between two sizes, choose the larger size for a more comfortable fit.</span>
               </div>
             </div>

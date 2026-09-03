@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
+import Icon from '../components/Icon';
+import ImageWithFallback from '../components/ImageWithFallback';
 
 export default function OrdersPage() {
   const { orders } = useStore();
@@ -30,15 +32,15 @@ export default function OrdersPage() {
             <div className="order-card" key={o.id}>
               <div className="order-card-top"><strong>Order #{o.id}</strong><span className={`tracking-status-badge ${o.status}`}>{o.status}</span></div>
               <p>{o.items.length} item(s) · ₹{o.total}{o.date ? ` · ${formatDate(o.date)}` : ''}</p>
-              {o.paymentMethod && <p className="order-payment-method"><i className="fa-solid fa-credit-card" /> {o.paymentMethod}</p>}
+              {o.paymentMethod && <p className="order-payment-method"><Icon name="credit-card" /> {o.paymentMethod}</p>}
               <button className="order-expand-btn" onClick={() => setExpandedOrder(isExpanded ? null : o.id)}>
-                {isExpanded ? 'Hide Details' : 'View Details'} <i className={`fa-solid fa-chevron-${isExpanded ? 'up' : 'down'}`} />
+                {isExpanded ? 'Hide Details' : 'View Details'} <Icon name={isExpanded ? 'chevron-up' : 'chevron-down'} />
               </button>
               {isExpanded && <div className="order-details-expanded">
                 {o.items.length > 0 && <div className="order-detail-section">
-                  <h4><i className="fa-solid fa-bag-shopping" /> Products</h4>
+                  <h4><Icon name="bag-shopping" /> Products</h4>
                   {o.items.map((item, idx) => <div key={idx} className="order-detail-product">
-                    {item.image && <img src={item.image} alt={item.name} className="order-detail-thumb" />}
+                    {item.image && <ImageWithFallback src={item.image} alt={item.name} className="order-detail-thumb" />}
                     <div className="order-detail-product-info">
                       <strong>{item.name}</strong>
                       <span>Qty: {item.quantity}{item.size ? ` · Size: ${item.size}` : ''}{item.color ? ` · Color: ${item.color}` : ''}</span>
@@ -47,7 +49,7 @@ export default function OrdersPage() {
                   </div>)}
                 </div>}
                 {addr && (addr.full_name || addr.name || addr.house_flat || addr.line || addr.city) && <div className="order-detail-section">
-                  <h4><i className="fa-solid fa-location-dot" /> Delivery Address</h4>
+                  <h4><Icon name="location-dot" /> Delivery Address</h4>
                   <div className="order-detail-address">
                     <p><strong>{addr.full_name || addr.name}</strong></p>
                     <p>{addr.house_flat || addr.line || addr.address}{addr.street ? `, ${addr.street}` : ''}{addr.area ? `, ${addr.area}` : ''}</p>
@@ -57,7 +59,7 @@ export default function OrdersPage() {
                   </div>
                 </div>}
                 {breakdown && <div className="order-detail-section">
-                  <h4><i className="fa-solid fa-indian-rupee-sign" /> Price Breakdown</h4>
+                  <h4><Icon name="dollar-sign" /> Price Breakdown</h4>
                   <div className="order-detail-pricing">
                     <div className="order-detail-price-row"><span>MRP</span><span>₹{breakdown.total_mrp}</span></div>
                     {breakdown.discount > 0 && <div className="order-detail-price-row"><span>Discount</span><span className="text-green-600">-₹{breakdown.discount}</span></div>}
@@ -68,15 +70,15 @@ export default function OrdersPage() {
                   </div>
                 </div>}
                 {o.delivery_info && <div className="order-detail-section">
-                  <h4><i className="fa-solid fa-truck" /> Delivery Info</h4>
+                  <h4><Icon name="truck" /> Delivery Info</h4>
                   <p>Expected: {o.delivery_info.expected_date} · {o.delivery_info.estimated_time}</p>
                 </div>}
                 {o.order_notes && <div className="order-detail-section">
-                  <h4><i className="fa-solid fa-note-sticky" /> Order Notes</h4>
+                  <h4><Icon name="note-sticky" /> Order Notes</h4>
                   <p className="order-detail-notes">{o.order_notes}</p>
                 </div>}
                 {o.paymentId && <div className="order-detail-section">
-                  <h4><i className="fa-solid fa-receipt" /> Payment Info</h4>
+                  <h4><Icon name="receipt" /> Payment Info</h4>
                   <p>Payment ID: {o.paymentId}</p>
                   {o.coupon && <p>Coupon: {o.coupon.code}</p>}
                 </div>}

@@ -3,6 +3,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { categories as staticCategories } from '../data';
 import { useProducts } from '../context/ProductContext';
 import ProductGrid from '../components/ProductGrid';
+import Icon from '../components/Icon';
+import ImageWithFallback from '../components/ImageWithFallback';
 
 export function CategoryPage() {
   const { category } = useParams();
@@ -16,7 +18,7 @@ export function CategoryPage() {
 
   return (
     <>
-      <section className="category-hero" style={{ backgroundImage: `linear-gradient(rgba(0,0,0,.2),rgba(0,0,0,.2)), url('${cat?.image || 'https://via.placeholder.com/1200x400?text=Collection'}')` }}>
+      <section className="category-hero" style={{ backgroundImage: `linear-gradient(rgba(0,0,0,.2),rgba(0,0,0,.2)), url('${cat?.image || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='400' viewBox='0 0 1200 400'%3E%3Crect fill='%23f1f5f9' width='1200' height='400'/%3E%3Ctext x='600' y='205' text-anchor='middle' fill='%2394a3b8' font-family='Inter,system-ui,sans-serif' font-size='18'%3ECollection%3C/text%3E%3C/svg%3E"}')` }}>
         <div className="category-hero-content">
           <h1>{title}</h1>
           <p>Discover styles crafted to elevate every occasion.</p>
@@ -174,10 +176,10 @@ export function ShopPage() {
           {staticCategories.map(c => (
             <Link key={c.id} to={`/${c.id}`} className="category-card">
               <div className="category-image-wrapper">
-                <img src={c.image} alt={c.name} />
+                <ImageWithFallback src={c.image} alt={c.name} />
                 <div className="category-overlay">
                   <h3>{c.name}</h3>
-                  <span className="category-explore">Explore <i className="fa-solid fa-arrow-right" /></span>
+                  <span className="category-explore">Explore <Icon name="arrow-right" /></span>
                 </div>
               </div>
             </Link>
@@ -192,7 +194,7 @@ export function ShopPage() {
             <div className="filter-header">
               <h3>Filters</h3>
               <div className="filter-header-actions">
-                <button className="filter-close md:hidden" onClick={() => setFilterOpen(false)} aria-label="Close filters"><i className="fa-solid fa-xmark" /></button>
+                <button className="filter-close md:hidden" onClick={() => setFilterOpen(false)} aria-label="Close filters"><Icon name="xmark" /></button>
                 <button className="filter-clear" onClick={() => { setMax(10000); setSelected(apiCategories.length > 0 ? apiCategories : staticCategories.map(c => c.id)); setSort('default'); }}>Clear All</button>
               </div>
             </div>
@@ -227,11 +229,11 @@ export function ShopPage() {
           <div className="shop-main">
             <div className="shop-toolbar">
               <div className="shop-toolbar-left">
-                <button className="filter-toggle md:hidden" onClick={() => setFilterOpen(true)}><i className="fa-solid fa-sliders" /> Filters</button>
+                <button className="filter-toggle md:hidden" onClick={() => setFilterOpen(true)}><Icon name="sliders" /> Filters</button>
                 <span className="shop-result-count">{items.length} products</span>
               </div>
               <div className={`shop-search-box${highlight ? ' search-highlight' : ''}`} ref={searchBoxRef}>
-                <i className="fa-solid fa-magnifying-glass" />
+                <Icon name="magnifying-glass" />
                 <input
                   ref={searchInputRef}
                   type="text"
@@ -241,7 +243,7 @@ export function ShopPage() {
                 />
                 {params.get('search') && (
                   <button className="shop-search-clear" onClick={() => setParams({}, { replace: true })} aria-label="Clear search">
-                    <i className="fa-solid fa-xmark" />
+                    <Icon name="xmark" />
                   </button>
                 )}
               </div>

@@ -1,11 +1,14 @@
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import Icon, { BrandIcon } from '../components/Icon';
+import ImageWithFallback from '../components/ImageWithFallback';
 
 export function AboutPage() {
   const values = [
-    { icon: 'fa-gem', title: 'Premium Quality', desc: 'Fine craftsmanship and hand-selected fabrics ensure every piece meets our exacting standards.' },
-    { icon: 'fa-leaf', title: 'Sustainable Fashion', desc: 'Thoughtful sourcing and timeless designs that respect people and the planet.' },
-    { icon: 'fa-headset', title: 'Customer First', desc: 'Fast shipping, easy returns, and 24/7 dedicated support for a seamless experience.' },
-    { icon: 'fa-heart', title: 'Inclusive Style', desc: 'Fashion curated for every personality, body type, and occasion.' },
+    { icon: 'gem', title: 'Premium Quality', desc: 'Fine craftsmanship and hand-selected fabrics ensure every piece meets our exacting standards.' },
+    { icon: 'leaf', title: 'Sustainable Fashion', desc: 'Thoughtful sourcing and timeless designs that respect people and the planet.' },
+    { icon: 'headset', title: 'Customer First', desc: 'Fast shipping, easy returns, and 24/7 dedicated support for a seamless experience.' },
+    { icon: 'heart', title: 'Inclusive Style', desc: 'Fashion curated for every personality, body type, and occasion.' },
   ];
   const stats = [
     ['10,000+', 'Happy Customers'],
@@ -14,10 +17,10 @@ export function AboutPage() {
     ['Pan-India', 'Fast Delivery'],
   ];
   const promises = [
-    { icon: 'fa-shield-halved', title: 'Quality Checks', desc: 'Every product undergoes multi-point quality inspection before it reaches your doorstep.' },
-    { icon: 'fa-lock', title: 'Secure Checkout', desc: 'Industry-standard encryption keeps your payments and personal data safe.' },
-    { icon: 'fa-rotate-left', title: 'Hassle-Free Returns', desc: 'Changed your mind? Enjoy easy 30-day returns and instant refunds.' },
-    { icon: 'fa-truck-fast', title: 'Express Delivery', desc: 'Free shipping on orders over ₹1000 with express options available.' },
+    { icon: 'shield-halved', title: 'Quality Checks', desc: 'Every product undergoes multi-point quality inspection before it reaches your doorstep.' },
+    { icon: 'lock', title: 'Secure Checkout', desc: 'Industry-standard encryption keeps your payments and personal data safe.' },
+    { icon: 'rotate-left', title: 'Hassle-Free Returns', desc: 'Changed your mind? Enjoy easy 30-day returns and instant refunds.' },
+    { icon: 'truck-fast', title: 'Express Delivery', desc: 'Free shipping on orders over ₹1000 with express options available.' },
   ];
   return <>
     <section className="about-hero">
@@ -37,7 +40,7 @@ export function AboutPage() {
           <p>We curate collections that blend timeless elegance with contemporary flair, making it easy for you to express your unique style with confidence.</p>
         </div>
         <div className="about-journey-image">
-          <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&h=400&fit=crop" alt="LayaStore journey" />
+          <ImageWithFallback src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&h=400&fit=crop" alt="LayaStore journey" width="600" height="400" />
         </div>
       </div>
     </section>
@@ -51,7 +54,7 @@ export function AboutPage() {
         </div>
         <div className="about-values-grid">
           {values.map((v, i) => <div className="about-value-card" key={i}>
-            <div className="about-value-icon"><i className={`fa-solid ${v.icon}`} /></div>
+            <div className="about-value-icon"><Icon name={v.icon} /></div>
             <h3>{v.title}</h3>
             <p>{v.desc}</p>
           </div>)}
@@ -77,7 +80,7 @@ export function AboutPage() {
         </div>
         <div className="about-promise-grid">
           {promises.map((p, i) => <div className="about-promise-card" key={i}>
-            <div className="about-promise-icon"><i className={`fa-solid ${p.icon}`} /></div>
+            <div className="about-promise-icon"><Icon name={p.icon} /></div>
             <h3>{p.title}</h3>
             <p>{p.desc}</p>
           </div>)}
@@ -89,21 +92,20 @@ export function AboutPage() {
       <div className="about-cta-inner">
         <h2>Ready to Explore?</h2>
         <p>Discover our latest collections and find your next favourite piece.</p>
-        <Link to="/new-arrivals" className="about-cta-btn">Shop New Arrivals <i className="fa-solid fa-arrow-right" /></Link>
+        <Link to="/new-arrivals" className="about-cta-btn">Shop New Arrivals <Icon name="arrow-right" /></Link>
       </div>
     </section>
   </>;
 }
-import { useState } from 'react';
 
 const SUPPORT_CATEGORIES = [
-  { icon: 'fa-bag-shopping', title: 'Order Support', desc: 'Track, modify, or get help with an existing order.', color: '#7C3AED' },
-  { icon: 'fa-rotate-left', title: 'Returns & Refunds', desc: 'Initiate a return or check refund status.', color: '#EC4899' },
-  { icon: 'fa-truck-fast', title: 'Shipping Info', desc: 'Delivery timelines, shipping partners & policies.', color: '#A855F7' },
-  { icon: 'fa-credit-card', title: 'Payment Assistance', desc: 'Payment failures, EMI options & gateway issues.', color: '#F59E0B' },
-  { icon: 'fa-ruler-combined', title: 'Size & Fit Help', desc: 'Size guides, measurements & fit recommendations.', color: '#22C55E' },
-  { icon: 'fa-wrench', title: 'Technical Support', desc: 'App issues, account problems & website bugs.', color: '#3B82F6' },
-  { icon: 'fa-briefcase', title: 'Business Enquiries', desc: 'Partnerships, bulk orders & wholesale.', color: '#8B5CF6' },
+  { icon: 'bag-shopping', title: 'Order Support', desc: 'Track, modify, or get help with an existing order.', color: '#7C3AED' },
+  { icon: 'rotate-left', title: 'Returns & Refunds', desc: 'Initiate a return or check refund status.', color: '#EC4899' },
+  { icon: 'truck-fast', title: 'Shipping Info', desc: 'Delivery timelines, shipping partners & policies.', color: '#A855F7' },
+  { icon: 'credit-card', title: 'Payment Assistance', desc: 'Payment failures, EMI options & gateway issues.', color: '#F59E0B' },
+  { icon: 'ruler-combined', title: 'Size & Fit Help', desc: 'Size guides, measurements & fit recommendations.', color: '#22C55E' },
+  { icon: 'wrench', title: 'Technical Support', desc: 'App issues, account problems & website bugs.', color: '#3B82F6' },
+  { icon: 'briefcase', title: 'Business Enquiries', desc: 'Partnerships, bulk orders & wholesale.', color: '#8B5CF6' },
 ];
 
 const SUPPORT_FAQ = [
@@ -117,11 +119,11 @@ const SUPPORT_FAQ = [
 ];
 
 const QUICK_HELP = [
-  { icon: 'fa-location-crosshairs', label: 'Track Order', path: '/tracking' },
-  { icon: 'fa-box-open', label: 'My Orders', path: '/orders' },
-  { icon: 'fa-truck', label: 'Shipping Policy', path: '/shipping-policy' },
-  { icon: 'fa-rotate-left', label: 'Return Policy', path: '/return-policy' },
-  { icon: 'fa-shield-halved', label: 'Privacy Policy', path: '/privacy-policy' },
+  { icon: 'location-crosshairs', label: 'Track Order', path: '/tracking' },
+  { icon: 'box-open', label: 'My Orders', path: '/orders' },
+  { icon: 'truck', label: 'Shipping Policy', path: '/shipping-policy' },
+  { icon: 'rotate-left', label: 'Return Policy', path: '/return-policy' },
+  { icon: 'shield-halved', label: 'Privacy Policy', path: '/privacy-policy' },
 ];
 
 function SupportHero() {
@@ -159,7 +161,7 @@ function SupportCenter() {
               type="button"
             >
               <div className="csh-support-icon" style={{ background: `${c.color}12`, color: c.color }}>
-                <i className={`fa-solid ${c.icon}`} />
+                <Icon name={c.icon} />
               </div>
               <h3>{c.title}</h3>
               <p>{c.desc}</p>
@@ -188,28 +190,28 @@ function LiveSupportSection() {
         <div className="csh-live-right">
           <div className="csh-live-card">
             <div className="csh-live-item">
-              <div className="csh-live-icon"><i className="fa-solid fa-comments" /></div>
+              <div className="csh-live-icon"><Icon name="comments" /></div>
               <div>
                 <strong>Live Chat</strong>
                 <span>Available now — avg. wait 30 seconds</span>
               </div>
             </div>
             <div className="csh-live-item">
-              <div className="csh-live-icon"><i className="fa-solid fa-clock" /></div>
+              <div className="csh-live-icon"><Icon name="clock" /></div>
               <div>
                 <strong>Response Time</strong>
                 <span>Under 1 hour during business hours</span>
               </div>
             </div>
             <div className="csh-live-item">
-              <div className="csh-live-icon"><i className="fa-solid fa-calendar-check" /></div>
+              <div className="csh-live-icon"><Icon name="calendar-check" /></div>
               <div>
                 <strong>Customer Care Hours</strong>
                 <span>Mon–Sat 9 AM – 8 PM IST</span>
               </div>
             </div>
             <div className="csh-live-item">
-              <div className="csh-live-icon"><i className="fa-solid fa-phone-volume" /></div>
+              <div className="csh-live-icon"><Icon name="phone-volume" /></div>
               <div>
                 <strong>Preferred Contact</strong>
                 <span>+91 98765 43210 or chat below</span>
@@ -256,21 +258,21 @@ function ContactFormSection() {
             <p className="csh-form-desc">Fill out the form and our team will get back to you within 1 hour during business hours.</p>
             <div className="csh-form-meta">
               <div className="csh-form-meta-item">
-                <div className="csh-form-meta-icon"><i className="fa-solid fa-clock" /></div>
+                <div className="csh-form-meta-icon"><Icon name="clock" /></div>
                 <div>
                   <strong>Average Response</strong>
                   <span>Under 1 hour</span>
                 </div>
               </div>
               <div className="csh-form-meta-item">
-                <div className="csh-form-meta-icon"><i className="fa-solid fa-shield-halved" /></div>
+                <div className="csh-form-meta-icon"><Icon name="shield-halved" /></div>
                 <div>
                   <strong>Secure & Private</strong>
                   <span>Your data is encrypted</span>
                 </div>
               </div>
               <div className="csh-form-meta-item">
-                <div className="csh-form-meta-icon"><i className="fa-solid fa-headset" /></div>
+                <div className="csh-form-meta-icon"><Icon name="headset" /></div>
                 <div>
                   <strong>Need Urgent Help?</strong>
                   <span>Call +91 98765 43210</span>
@@ -282,7 +284,7 @@ function ContactFormSection() {
           <div className="csh-form-card">
             {status === 'success' && (
               <div className="csh-form-success">
-                <i className="fa-solid fa-circle-check" />
+                <Icon name="circle-check" />
                 <strong>Message Sent Successfully!</strong>
                 <p>Our team will review your request and respond shortly.</p>
               </div>
@@ -314,7 +316,7 @@ function ContactFormSection() {
                 {errors.message && <span className="csh-field-err">{errors.message}</span>}
               </div>
               <button className={`csh-submit-btn ${status}`} type="submit" disabled={status === 'loading'}>
-                {status === 'loading' ? <><span className="csh-spinner" /> Sending...</> : status === 'success' ? <><i className="fa-solid fa-check" /> Sent!</> : <><i className="fa-solid fa-paper-plane" /> Send Message</>}
+                {status === 'loading' ? <><span className="csh-spinner" /> Sending...</> : status === 'success' ? <><Icon name="check" /> Sent!</> : <><Icon name="paper-plane" /> Send Message</>}
               </button>
             </form>
           </div>
@@ -334,28 +336,28 @@ function MapAndStoreSection() {
             <h2>Visit Our Store</h2>
             <div className="csh-store-info">
               <div className="csh-store-row">
-                <i className="fa-solid fa-location-dot" />
+                <Icon name="location-dot" />
                 <div>
                   <strong>Address</strong>
                   <span>123 Fashion Avenue, Vellore, Tamil Nadu 632001</span>
                 </div>
               </div>
               <div className="csh-store-row">
-                <i className="fa-solid fa-phone" />
+                <Icon name="phone" />
                 <div>
                   <strong>Phone</strong>
                   <span>+91 98765 43210</span>
                 </div>
               </div>
               <div className="csh-store-row">
-                <i className="fa-solid fa-envelope" />
+                <Icon name="envelope" />
                 <div>
                   <strong>Email</strong>
                   <span>support@layastore.com</span>
                 </div>
               </div>
               <div className="csh-store-row">
-                <i className="fa-solid fa-clock" />
+                <Icon name="clock" />
                 <div>
                   <strong>Hours</strong>
                   <span>Mon–Fri: 9 AM – 8 PM &nbsp;|&nbsp; Sat: 10 AM – 6 PM</span>
@@ -363,11 +365,11 @@ function MapAndStoreSection() {
               </div>
             </div>
             <div className="csh-social-row">
-              <a href="#" aria-label="Instagram"><i className="fa-brands fa-instagram" /></a>
-              <a href="#" aria-label="Facebook"><i className="fa-brands fa-facebook-f" /></a>
-              <a href="#" aria-label="X"><i className="fa-brands fa-x-twitter" /></a>
-              <a href="#" aria-label="Pinterest"><i className="fa-brands fa-pinterest-p" /></a>
-              <a href="#" aria-label="LinkedIn"><i className="fa-brands fa-linkedin-in" /></a>
+              <a href="#" aria-label="Instagram"><BrandIcon name="instagram" /></a>
+              <a href="#" aria-label="Facebook"><BrandIcon name="facebook-f" /></a>
+              <a href="#" aria-label="X"><BrandIcon name="x-twitter" /></a>
+              <a href="#" aria-label="Pinterest"><BrandIcon name="pinterest-p" /></a>
+              <a href="#" aria-label="LinkedIn"><BrandIcon name="linkedin-in" /></a>
             </div>
           </div>
           <div className="csh-map-col csh-map-frame">
@@ -378,7 +380,6 @@ function MapAndStoreSection() {
               height="100%"
               style={{ border: 0 }}
               allowFullScreen=""
-              loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
             />
           </div>
@@ -394,7 +395,7 @@ function FAQItem({ q, a }) {
     <div className={`csh-faq-item ${open ? 'open' : ''}`}>
       <button className="csh-faq-q" onClick={() => setOpen(!open)} aria-expanded={open}>
         <span>{q}</span>
-        <i className={`fa-solid ${open ? 'fa-chevron-up' : 'fa-chevron-down'}`} />
+        <Icon name={open ? 'chevron-up' : 'chevron-down'} />
       </button>
       <div className="csh-faq-a" style={{ maxHeight: open ? '200px' : '0' }}>
         <p>{a}</p>
@@ -431,9 +432,9 @@ function QuickHelpSection() {
         <div className="csh-quick-grid">
           {QUICK_HELP.map((h, i) => (
             <Link key={i} to={h.path} className="csh-quick-card">
-              <i className={`fa-solid ${h.icon}`} />
+              <Icon name={h.icon} />
               <span>{h.label}</span>
-              <i className="fa-solid fa-arrow-right csh-quick-arrow" />
+              <Icon name="arrow-right" className="csh-quick-arrow" />
             </Link>
           ))}
         </div>
@@ -525,7 +526,7 @@ function ContactNewsletter() {
     <section className="csh-nl-section">
       <div className="csh-nl-inner">
         <div className="csh-nl-left">
-          <span className="csh-nl-badge"><i className="fa-solid fa-bell" /> Stay in the Loop</span>
+          <span className="csh-nl-badge"><Icon name="bell" /> Stay in the Loop</span>
           <h2>Get Support Updates & Offers</h2>
           <p>Be the first to know about new features, exclusive deals, and seasonal collections.</p>
         </div>

@@ -1,13 +1,15 @@
 import { Link } from 'react-router-dom';
 import { useRef, useEffect, useCallback } from 'react';
+import Icon, { BrandIcon } from '../components/Icon';
+import ImageWithFallback from '../components/ImageWithFallback';
 
 
 const WHY_CHOOSE = [
-  { icon: 'fa-gem', title: 'Premium Quality', desc: 'We handpick every product for exceptional quality and durability.' },
-  { icon: 'fa-tags', title: 'Affordable Prices', desc: 'Luxury fashion at prices that won\'t break the bank.' },
-  { icon: 'fa-truck-fast', title: 'Fast Delivery', desc: 'Free shipping on orders over ₹1000 with express delivery options.' },
-  { icon: 'fa-shield-halved', title: 'Secure Checkout', desc: 'Your data is protected with industry-standard encryption.' },
-  { icon: 'fa-face-smile', title: 'Customer Satisfaction', desc: 'Our support team is here 24/7 to help you.' },
+  { icon: 'gem', title: 'Premium Quality', desc: 'We handpick every product for exceptional quality and durability.' },
+  { icon: 'tags', title: 'Affordable Prices', desc: 'Luxury fashion at prices that won\'t break the bank.' },
+  { icon: 'truck-fast', title: 'Fast Delivery', desc: 'Free shipping on orders over ₹1000 with express delivery options.' },
+  { icon: 'shield-halved', title: 'Secure Checkout', desc: 'Your data is protected with industry-standard encryption.' },
+  { icon: 'face-smile', title: 'Customer Satisfaction', desc: 'Our support team is here 24/7 to help you.' },
 ];
 
 const REVIEWS = [
@@ -45,18 +47,18 @@ function HeroSection() {
     <div className="hero-overlay" />
     <div className="hero-content">
       <div className="hero-badge-row">
-        <span className="hero-badge"><i className="fa-solid fa-sun" /> Summer Collection</span>
+        <span className="hero-badge"><Icon name="sun" /> Summer Collection</span>
         <span className="hero-badge hero-badge-sale">Up to 20% Off</span>
       </div>
       <h1>Get up to 20% Off<br />New Arrivals</h1>
       <p className="hero-desc">Discover the Latest Fashion Trends — curated just for you.</p>
       <div className="hero-actions">
-        <Link to="/shop" className="hero-btn-primary">SHOP NOW <i className="fa-solid fa-arrow-right" /></Link>
-        <Link to="/new" className="hero-btn-secondary">EXPLORE COLLECTION <i className="fa-solid fa-arrow-right" /></Link>
+        <Link to="/shop" className="hero-btn-primary">SHOP NOW <Icon name="arrow-right" /></Link>
+        <Link to="/new" className="hero-btn-secondary">EXPLORE COLLECTION <Icon name="arrow-right" /></Link>
       </div>
       <div className="hero-trust">
-        {[['fa-truck-fast','Free Shipping'],['fa-shield-halved','Secure Payments'],['fa-rotate-left','Easy Returns'],['fa-gem','Premium Quality']].map(([icon,label]) => <div className="hero-trust-item" key={label}>
-          <i className={`fa-solid ${icon}`} /><span>{label}</span>
+        {[['truck-fast','Free Shipping'],['shield-halved','Secure Payments'],['rotate-left','Easy Returns'],['gem','Premium Quality']].map(([icon,label]) => <div className="hero-trust-item" key={label}>
+          <Icon name={icon} /><span>{label}</span>
         </div>)}
       </div>
     </div>
@@ -65,15 +67,15 @@ function HeroSection() {
 
 function FeatureHighlights() {
   const features = [
-    { icon: 'fa-truck-fast', title: 'Free Shipping', desc: 'On orders above ₹1000' },
-    { icon: 'fa-rotate-left', title: 'Easy Returns', desc: '30-day return policy' },
-    { icon: 'fa-shield-halved', title: 'Secure Payments', desc: '100% secure checkout' },
-    { icon: 'fa-headset', title: '24/7 Support', desc: 'Dedicated customer care' },
+    { icon: 'truck-fast', title: 'Free Shipping', desc: 'On orders above ₹1000' },
+    { icon: 'rotate-left', title: 'Easy Returns', desc: '30-day return policy' },
+    { icon: 'shield-halved', title: 'Secure Payments', desc: '100% secure checkout' },
+    { icon: 'headset', title: '24/7 Support', desc: 'Dedicated customer care' },
   ];
   return <section className="feature-highlights">
     <div className="fh-container">
       {features.map((f, i) => <div className="fh-card" key={i}>
-        <div className="fh-icon-wrapper"><i className={`fa-solid ${f.icon}`} /></div>
+        <div className="fh-icon-wrapper"><Icon name={f.icon} /></div>
         <div className="fh-text"><h4>{f.title}</h4><p>{f.desc}</p></div>
       </div>)}
     </div>
@@ -90,7 +92,7 @@ function WhyChooseSection() {
       </div>
       <div className="why-choose-grid">
         {WHY_CHOOSE.map((item, i) => <div className="why-choose-card" key={i}>
-          <div className="why-choose-icon"><i className={`fa-solid ${item.icon}`} /></div>
+          <div className="why-choose-icon"><Icon name={item.icon} /></div>
           <h3>{item.title}</h3>
           <p>{item.desc}</p>
         </div>)}
@@ -111,10 +113,10 @@ function ReviewsSection() {
     <div className="reviews-container">
       <SectionHeading tag="Testimonials" title="What Our Customers Say" desc="Real reviews from real people who love LayaStore" />
       <div className="reviews-carousel-wrapper">
-        <button className="review-arrow review-arrow-left" onClick={() => scroll(-1)} aria-label="Previous reviews"><i className="fa-solid fa-chevron-left" /></button>
+        <button className="review-arrow review-arrow-left" onClick={() => scroll(-1)} aria-label="Previous reviews"><Icon name="chevron-left" /></button>
         <div className="reviews-track" ref={trackRef}>
           {REVIEWS.map((r, i) => <div className="review-card" key={i}>
-            <div className="review-stars">{Array.from({ length: 5 }, (_, j) => <i key={j} className={`fa-${j < r.rating ? 'solid' : 'regular'} fa-star`} />)}</div>
+            <div className="review-stars">{Array.from({ length: 5 }, (_, j) => <Icon key={j} name="star" className={j < r.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'} />)}</div>
             <p className="review-text">"{r.text}"</p>
             <div className="review-author">
               <div className="review-avatar">{r.avatar}</div>
@@ -125,7 +127,7 @@ function ReviewsSection() {
             </div>
           </div>)}
         </div>
-        <button className="review-arrow review-arrow-right" onClick={() => scroll(1)} aria-label="Next reviews"><i className="fa-solid fa-chevron-right" /></button>
+        <button className="review-arrow review-arrow-right" onClick={() => scroll(1)} aria-label="Next reviews"><Icon name="chevron-right" /></button>
       </div>
     </div>
   </section>;
@@ -170,13 +172,13 @@ function SocialGallery() {
       </div>
       <div className="sg-grid">
         {SOCIAL_IMAGES.map((img, i) => <div className="sg-item" key={i}>
-          <img src={img} alt={`LayaStore fashion ${i + 1}`} loading="lazy" />
-          <div className="sg-overlay"><i className="fa-brands fa-instagram" /></div>
+          <ImageWithFallback src={img} alt={`LayaStore fashion ${i + 1}`} loading="lazy" width="300" height="300" />
+          <div className="sg-overlay"><BrandIcon name="instagram" /></div>
         </div>)}
       </div>
       <div className="sg-footer">
         <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="sg-btn" aria-label="Follow us on Instagram">
-          <i className="fa-brands fa-instagram" /> Follow @layastore
+          <BrandIcon name="instagram" /> Follow @layastore
         </a>
       </div>
     </div>

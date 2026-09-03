@@ -2,12 +2,16 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useProducts } from '../context/ProductContext';
 import { useStore } from '../context/StoreContext';
+import Icon from '../components/Icon';
+import ImageWithFallback from '../components/ImageWithFallback';
+
+const PLACEHOLDER_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='700' viewBox='0 0 600 700'%3E%3Crect fill='%23f1f5f9' width='600' height='700'/%3E%3Cg transform='translate(240,300)'%3E%3Crect fill='%23e2e8f0' x='40' y='0' width='80' height='80' rx='8'/%3E%3Ccircle fill='%23cbd5e1' cx='80' cy='25' r='15'/%3E%3Cpath fill='%23cbd5e1' d='M55 60 L80 35 L105 60' stroke='%23cbd5e1' stroke-width='4' fill='none'/%3E%3C/g%3E%3Ctext x='300' y='420' text-anchor='middle' fill='%2394a3b8' font-family='Inter,system-ui,sans-serif' font-size='14'%3ENo Image%3C/text%3E%3C/svg%3E";
 
 function getProductImage(product) {
   if (product.images && product.images.length > 0 && product.images[0]) {
     return product.images[0];
   }
-  return product.image || 'https://via.placeholder.com/600x700?text=No+Image';
+  return product.image || PLACEHOLDER_SVG;
 }
 
 function getProductPrice(product) {
@@ -73,11 +77,11 @@ export default function ProductDetailPage() {
       <div className="product-detail-page">
         <div className="product-detail-container max-w-6xl mx-auto px-4 py-12 text-center">
           <div className="py-20">
-            <i className="fa-solid fa-exclamation-triangle text-4xl text-gray-300 mb-4" />
+            <Icon name="exclamation-triangle" className="text-4xl text-gray-300 mb-4" />
             <h2 className="text-xl font-semibold text-gray-700 mb-2">Product Not Found</h2>
             <p className="text-gray-500 mb-6">{error || 'The product you are looking for does not exist or has been removed.'}</p>
             <Link to="/shop" className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-              <i className="fa-solid fa-arrow-left" /> Back to Shop
+              <Icon name="arrow-left" /> Back to Shop
             </Link>
           </div>
         </div>
@@ -85,7 +89,7 @@ export default function ProductDetailPage() {
     );
   }
 
-  const images = product.images?.length > 0 ? product.images : [product.image || 'https://via.placeholder.com/600x700?text=No+Image'];
+  const images = product.images?.length > 0 ? product.images : [product.image || PLACEHOLDER_SVG];
   const price = getProductPrice(product);
   const hasDiscount = product.discount_price > 0 && product.discount_price < product.price;
   const inWishlist = wishlist.includes(product._id || product.id);
@@ -117,13 +121,13 @@ export default function ProductDetailPage() {
       <div className="product-detail-container max-w-6xl mx-auto px-4 py-8">
         <nav className="flex items-center gap-2 text-sm text-gray-500 mb-6">
           <Link to="/" className="hover:text-purple-600">Home</Link>
-          <i className="fa-solid fa-chevron-right text-xs" />
+          <Icon name="chevron-right" className="text-xs" />
           <Link to="/shop" className="hover:text-purple-600">Shop</Link>
-          <i className="fa-solid fa-chevron-right text-xs" />
+          <Icon name="chevron-right" className="text-xs" />
           {product.category && (
             <>
               <Link to={`/${product.category}`} className="hover:text-purple-600 capitalize">{product.category.replace(/-/g, ' ')}</Link>
-              <i className="fa-solid fa-chevron-right text-xs" />
+              <Icon name="chevron-right" className="text-xs" />
             </>
           )}
           <span className="text-gray-700 truncate">{product.name}</span>
@@ -132,7 +136,7 @@ export default function ProductDetailPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
         <div className="space-y-4">
           <div className="rounded-2xl overflow-hidden bg-gray-100 aspect-[4/5]">
-            <img
+            <ImageWithFallback
               src={images[selectedImage]}
               alt={product.name}
               className="w-full h-full object-cover"
@@ -146,7 +150,7 @@ export default function ProductDetailPage() {
                   onClick={() => setSelectedImage(i)}
                   className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 ${selectedImage === i ? 'border-purple-600' : 'border-gray-200'}`}
                 >
-                  <img src={img} alt={`${product.name} ${i + 1}`} className="w-full h-full object-cover" />
+                  <ImageWithFallback src={img} alt={`${product.name} ${i + 1}`} className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
@@ -166,7 +170,7 @@ export default function ProductDetailPage() {
           </div>
 
           <div className="flex items-center gap-1 text-yellow-400">
-            {[1, 2, 3, 4, 5].map(i => <i key={i} className="fa-solid fa-star" />)}
+            {[1, 2, 3, 4, 5].map(i => <Icon key={i} name="star" />)}
             <span className="text-sm text-gray-500 ml-2">(5.0)</span>
           </div>
 
@@ -210,14 +214,14 @@ export default function ProductDetailPage() {
                 onClick={() => setQuantity(q => Math.max(1, q - 1))}
                 className="w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-50"
               >
-                <i className="fa-solid fa-minus text-sm" />
+                <Icon name="minus" className="text-sm" />
               </button>
               <span className="w-12 text-center font-medium">{quantity}</span>
               <button
                 onClick={() => setQuantity(q => q + 1)}
                 className="w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-50"
               >
-                <i className="fa-solid fa-plus text-sm" />
+                <Icon name="plus" className="text-sm" />
               </button>
             </div>
           </div>
@@ -228,7 +232,7 @@ export default function ProductDetailPage() {
               disabled={isOutOfStock}
               className="flex-1 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              <i className="fa-solid fa-bag-shopping" />
+              <Icon name="bag-shopping" />
               {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
             </button>
             <button
@@ -236,34 +240,34 @@ export default function ProductDetailPage() {
               disabled={isOutOfStock}
               className="flex-1 py-3 bg-pink-600 hover:bg-pink-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              <i className="fa-solid fa-bolt" />
+              <Icon name="bolt" />
               Buy Now
             </button>
             <button
               onClick={() => toggleWishlist(product._id || product.id)}
               className={`w-12 h-12 rounded-lg border flex items-center justify-center transition-colors ${inWishlist ? 'bg-red-50 border-red-200 text-red-500' : 'border-gray-300 text-gray-500 hover:border-red-300 hover:text-red-500'}`}
             >
-              <i className={`fa-${inWishlist ? 'solid' : 'regular'} fa-heart`} />
+              <Icon name="heart" className={inWishlist ? 'fill-red-500' : ''} />
             </button>
           </div>
 
           <div className="border-t border-gray-200 pt-4 space-y-3">
             {product.category && (
               <div className="flex items-center gap-2 text-sm text-gray-600">
-                <i className="fa-solid fa-tag w-4 text-gray-400" />
+                <Icon name="tag" className="w-4 text-gray-400" />
                 <span className="font-medium">Category:</span>
                 <Link to={`/${product.category}`} className="text-purple-600 hover:underline capitalize">{product.category.replace(/-/g, ' ')}</Link>
               </div>
             )}
             {product.sku && (
               <div className="flex items-center gap-2 text-sm text-gray-600">
-                <i className="fa-solid fa-barcode w-4 text-gray-400" />
+                <Icon name="barcode" className="w-4 text-gray-400" />
                 <span className="font-medium">SKU:</span>
                 <span className="font-mono">{product.sku}</span>
               </div>
             )}
             <div className="flex items-center gap-2 text-sm text-gray-600">
-              <i className="fa-solid fa-box w-4 text-gray-400" />
+              <Icon name="box" className="w-4 text-gray-400" />
               <span className="font-medium">Stock:</span>
               {isOutOfStock ? (
                 <span className="text-red-500">Out of Stock</span>
@@ -275,7 +279,7 @@ export default function ProductDetailPage() {
             </div>
             {product.tags?.length > 0 && (
               <div className="flex items-start gap-2 text-sm text-gray-600">
-                <i className="fa-solid fa-tags w-4 text-gray-400 mt-0.5" />
+                <Icon name="tags" className="w-4 text-gray-400 mt-0.5" />
                 <div className="flex flex-wrap gap-1">
                   {product.tags.map(tag => (
                     <span key={tag} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">{tag}</span>

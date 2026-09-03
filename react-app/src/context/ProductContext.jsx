@@ -66,7 +66,6 @@ export function ProductProvider({ children }) {
 
     const load = async () => {
       const data = await fetchProducts();
-      fetchCategories();
       if (cancelled) return;
       const failed = !data || (!Array.isArray(data.products) || data.products.length === 0);
       if (failed && retries < maxRetries) {
@@ -76,6 +75,7 @@ export function ProductProvider({ children }) {
     };
 
     load();
+    fetchCategories();
     return () => { cancelled = true; };
   }, [fetchProducts, fetchCategories]);
 

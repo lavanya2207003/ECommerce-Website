@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { adminAPI } from "../services/api";
+import ImageWithFallback from "../../components/ImageWithFallback";
 
 const PAYMENT_METHODS = ["Razorpay", "UPI", "Credit Card", "Debit Card", "Net Banking", "Wallet", "Cash on Delivery"];
 const PAYMENT_STATUSES = ["pending", "completed", "failed", "cancelled"];
@@ -436,7 +437,7 @@ export default function Payments() {
                       <div key={i} className="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
                         <div className="flex items-center gap-3">
                           {p.image && (
-                            <img src={p.image} alt={p.name} className="w-10 h-10 rounded-lg object-cover" />
+                            <ImageWithFallback src={p.image} alt={p.name} className="w-10 h-10 rounded-lg object-cover" />
                           )}
                           <div>
                             <p className="text-sm font-medium text-gray-900">{p.name}</p>

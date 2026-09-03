@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAdminAuth } from "../context/AdminAuthContext";
 import { adminAPI } from "../services/api";
+import { getImageUrl } from "../../services/getImageUrl";
 
 export default function Profile() {
   const { admin, updateProfile } = useAdminAuth();
@@ -46,7 +47,7 @@ export default function Profile() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
           <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             {admin?.avatar ? (
-              <img src={admin.avatar} alt={admin.name} className="w-24 h-24 rounded-full object-cover" />
+              <img src={getImageUrl(admin.avatar)} alt={admin.name} className="w-24 h-24 rounded-full object-cover" />
             ) : (
               <span className="text-red-600 text-3xl font-bold">{admin?.name?.charAt(0) || "A"}</span>
             )}

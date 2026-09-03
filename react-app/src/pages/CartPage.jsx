@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
+import ImageWithFallback from '../components/ImageWithFallback';
 
 export default function CartPage() {
   const { cart, removeFromCart, changeQuantity, clearCart } = useStore();
@@ -12,7 +13,7 @@ export default function CartPage() {
         <>
           {cart.map(item => (
             <div className="cart-item" key={item.id}>
-              <img src={item.image} alt={item.name} />
+              <ImageWithFallback src={item.image} alt={item.name} loading="eager" />
               <div><h3>{item.name}</h3><p>₹{item.price}</p></div>
               <div><button onClick={() => changeQuantity(item.id, item.quantity - 1)}>-</button> {item.quantity} <button onClick={() => changeQuantity(item.id, item.quantity + 1)}>+</button></div>
               <button onClick={() => removeFromCart(item.id)}>Remove</button>

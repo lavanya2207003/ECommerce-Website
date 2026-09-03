@@ -7,9 +7,11 @@ export default function Logo({ size = 'header', link = '/', className = '', onCl
     <img
       src={LOGO_SRC}
       alt="LayaStore - Fashion for You"
-      className="h-8 w-auto md:h-9"
+      className="h-7 w-auto sm:h-8 md:h-9"
       style={{ objectFit: 'contain', display: 'block' }}
       draggable={false}
+      loading="eager"
+      fetchpriority="high"
     />
   );
 

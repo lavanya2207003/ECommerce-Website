@@ -1,12 +1,16 @@
 import { Link } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
 import QuickViewModal from './QuickViewModal';
+import Icon from './Icon';
+import ImageWithFallback from './ImageWithFallback';
+
+const PLACEHOLDER_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='600' viewBox='0 0 500 600'%3E%3Crect fill='%23f1f5f9' width='500' height='600'/%3E%3Cg transform='translate(200,250)'%3E%3Crect fill='%23e2e8f0' x='40' y='0' width='60' height='60' rx='8'/%3E%3Ccircle fill='%23cbd5e1' cx='70' cy='20' r='12'/%3E%3Cpath fill='%23cbd5e1' d='M50 48 L70 28 L90 48' stroke='%23cbd5e1' stroke-width='4' fill='none'/%3E%3C/g%3E%3Ctext x='250' y='340' text-anchor='middle' fill='%2394a3b8' font-family='Inter,system-ui,sans-serif' font-size='14'%3ENo Image%3C/text%3E%3C/svg%3E";
 
 function getProductImage(product) {
   if (product.images && product.images.length > 0 && product.images[0]) {
     return product.images[0];
   }
-  return product.image || 'https://via.placeholder.com/500x600?text=No+Image';
+  return product.image || PLACEHOLDER_SVG;
 }
 
 function getProductPrice(product) {
@@ -52,7 +56,7 @@ export default function ProductGrid({ items, loading }) {
           <article className="product-card" key={product._id || product.id}>
             <div className="product-image-wrapper">
               <Link to={`/product/${product._id || product.id}`}>
-                <img src={getProductImage(product)} alt={product.name} loading="lazy" />
+                <ImageWithFallback src={getProductImage(product)} alt={product.name} loading="lazy" width="500" height="600" />
               </Link>
               {product.badge && <span className="product-badge">{product.badge}</span>}
               <button
@@ -60,20 +64,20 @@ export default function ProductGrid({ items, loading }) {
                 onClick={() => toggleWishlist(product._id || product.id)}
                 aria-label="Toggle wishlist"
               >
-                <i className={`fa-${wishlist.includes(product._id || product.id) ? 'solid' : 'regular'} fa-heart ${wishlist.includes(product._id || product.id) ? 'text-red-500' : ''}`} />
+                <Icon name="heart" className={wishlist.includes(product._id || product.id) ? 'text-red-500 fill-red-500' : ''} />
               </button>
               <div className="product-action-buttons">
                 <button
                   className="bg-gradient-to-r from-purple-600 to-pink-500 text-white font-medium text-xs px-4 py-1.5 rounded-full shadow-lg hover:from-purple-700 hover:to-pink-600 hover:shadow-xl transition-all duration-200 hover:scale-105 flex items-center justify-center gap-1.5 min-w-[120px] max-w-[80%]"
                   onClick={() => addToCart({ ...product, id: product._id || product.id, image: getProductImage(product) })}
                 >
-                  <i className="fa-solid fa-bag-shopping text-xs" /> Add to Cart
+                  <Icon name="bag-shopping" className="text-xs" /> Add to Cart
                 </button>
                 <button
                   className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-medium text-xs px-4 py-1.5 rounded-full shadow-lg hover:from-emerald-600 hover:to-teal-600 hover:shadow-xl transition-all duration-200 hover:scale-105 flex items-center justify-center gap-1.5 min-w-[120px] max-w-[80%]"
                   onClick={() => openQuickView({ ...product, id: product._id || product.id, image: getProductImage(product) })}
                 >
-                  <i className="fa-solid fa-eye text-xs" /> Quick View
+                  <Icon name="eye" className="text-xs" /> Quick View
                 </button>
               </div>
             </div>
@@ -83,9 +87,9 @@ export default function ProductGrid({ items, loading }) {
               </Link>
               {product.brand && <p className="text-xs text-gray-400 mb-1">{product.brand}</p>}
               <div className="product-rating">
-                <i className="fa-solid fa-star" /><i className="fa-solid fa-star" />
-                <i className="fa-solid fa-star" /><i className="fa-solid fa-star" />
-                <i className="fa-solid fa-star" />
+                <Icon name="star" /><Icon name="star" />
+                <Icon name="star" /><Icon name="star" />
+                <Icon name="star" />
               </div>
               <p className="product-description">{product.description}</p>
               <div className="flex items-center gap-2">

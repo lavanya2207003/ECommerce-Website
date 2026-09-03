@@ -2,6 +2,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { useStore } from '../context/StoreContext';
 import Logo from './Logo';
+import Icon from './Icon';
 
 export default function Header() {
   const [open, setOpen] = useState(false);
@@ -67,19 +68,19 @@ export default function Header() {
 
         <div className="icons">
           <button className="icon-btn" onClick={openSearch} aria-label="Search" title="Search">
-            <i className="fa-solid fa-magnifying-glass" />
+            <Icon name="magnifying-glass" />
           </button>
-          <Link to="/login"><i className="fa-solid fa-user" /></Link>
+          <Link to="/login"><Icon name="user" /></Link>
           <Link to="/wishlist" className="cart-icon-wrapper">
-            <i className="fa-regular fa-heart" />
+            <Icon name="heart" />
             {wishlistCount > 0 && <span>{wishlistCount}</span>}
           </Link>
           <Link to="/cart" className="cart-icon-wrapper">
-            <i className="fa-solid fa-cart-shopping" />
+            <Icon name="cart-shopping" />
             {count > 0 && <span className="cart-count-badge">{count}</span>}
           </Link>
           <button className="mobile-toggle" onClick={() => setOpen(!open)} aria-label="Toggle navigation">
-            <i className={`fa-solid ${open ? 'fa-xmark' : 'fa-bars'}`} />
+            <Icon name={open ? 'xmark' : 'bars'} />
           </button>
         </div>
       </nav>
@@ -92,7 +93,7 @@ export default function Header() {
         <div className="mobile-menu-header">
           <Logo size="header" link="/" onClick={() => setOpen(false)} />
           <button onClick={() => setOpen(false)} aria-label="Close menu">
-            <i className="fa-solid fa-xmark" />
+            <Icon name="xmark" />
           </button>
         </div>
         <ul className="mobile-menu-links">
@@ -104,10 +105,10 @@ export default function Header() {
         </ul>
         <div className="mobile-menu-footer">
           <button className="mobile-search-btn" onClick={openSearch}>
-            <i className="fa-solid fa-magnifying-glass" /> Search Products
+            <Icon name="magnifying-glass" /> Search Products
           </button>
           <Link to="/login" className="mobile-account-btn" onClick={() => setOpen(false)}>
-            <i className="fa-solid fa-user" /> My Account
+            <Icon name="user" /> My Account
           </Link>
         </div>
       </div>
