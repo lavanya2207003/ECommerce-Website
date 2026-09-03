@@ -130,7 +130,7 @@
   }
 
   @layer components {
-    /* ── Base (mobile-first): header = logo + icons + hamburger ── */
+    /* ── Base (mobile-first): header = logo + icons + hamburger — balanced flex layout ── */
     .header-sticky {
       @apply fixed top-0 left-0 right-0 z-50 bg-white shadow-sm;
       width: 100%;
@@ -142,51 +142,57 @@
       white-space: nowrap;
     }
     .navbar {
-      @apply flex items-center px-4 py-3 max-w-7xl mx-auto;
-      gap: 0;
-      overflow-x: hidden;
+      @apply flex items-center justify-between max-w-7xl mx-auto px-4 py-3;
+      gap: 12px;
+      overflow-x: clip;
+      width: 100%;
+      box-sizing: border-box;
     }
-    .navbar > * { flex-shrink: 0; min-width: 0; }
-    .icons { flex-shrink: 1; }
+    /* Even vertical centering for the whole row */
+    .navbar > * { min-width: 0; }
 
-    /* Logo */
+    /* Logo — fixed, never shrinks unevenly */
     .logo {
       @apply text-lg font-bold text-purple-700 shrink-0;
       font-family: var(--font-serif);
+      flex-shrink: 0;
     }
     .logo span { @apply text-pink-500; }
 
-    /* Desktop navigation — hidden by default, visible ≥1200px */
+    /* Desktop navigation — hidden on mobile, centered with equal gaps on desktop/tablet */
     .menu {
-      @apply hidden list-none;
+      @apply hidden list-none items-center;
       flex-shrink: 1;
       min-width: 0;
+      flex-wrap: nowrap;
     }
     .menu.active {
       @apply flex flex-col absolute top-full left-0 right-0 bg-white shadow-lg p-4 z-50;
     }
+    .menu li { flex-shrink: 0; }
     .menu li a {
       @apply text-xs font-medium text-gray-600 hover:text-purple-700 transition-colors;
       white-space: nowrap;
+      display: block;
     }
 
-    /* Action icons */
+    /* Action icons — grouped neatly, equal spacing */
     .icons {
-      @apply flex items-center ml-auto;
-      gap: 0;
-      flex-shrink: 1;
+      @apply flex items-center shrink-0;
+      gap: 12px;
+      flex-shrink: 0;
       min-width: 0;
     }
     .icons a {
-      @apply text-gray-600 hover:text-purple-700 transition-colors relative;
+      @apply text-gray-600 hover:text-purple-700 transition-colors relative flex items-center justify-center;
     }
     .icons .icon-btn {
-      @apply text-gray-600 hover:text-purple-700 transition-colors relative bg-transparent border-none cursor-pointer p-0;
+      @apply text-gray-600 hover:text-purple-700 transition-colors relative bg-transparent border-none cursor-pointer p-0 flex items-center justify-center;
     }
 
-    /* Hamburger — hidden by default on desktop, visible ≤1199px */
+    /* Hamburger — hidden on desktop, visible ≤1199px */
     .mobile-toggle {
-      @apply text-gray-700 bg-transparent border-none flex items-center justify-center;
+      @apply text-gray-700 bg-transparent border-none flex items-center justify-center shrink-0;
     }
 
     /* Cart badge */
@@ -197,58 +203,73 @@
     .cart-icon-wrapper span:not(:empty) { @apply flex; }
 
     /* ═══════════════════════════════════════════════════════
-       DESKTOP ≥1200px: full nav + full icons, no hamburger
+       DESKTOP ≥1200px: full nav centered, equal gaps, no hamburger
        ═══════════════════════════════════════════════════════ */
     @media (min-width: 1200px) {
-      .navbar { @apply px-6; gap: 24px; }
+      .navbar { @apply px-6; gap: 16px; }
       .logo { @apply text-2xl; }
-      .menu { @apply flex; gap: 24px; }
+      .menu { @apply flex flex-1 justify-center; gap: 16px; }
       .menu li a { @apply text-sm; }
-      .icons { gap: 16px; }
+      .icons { gap: 20px; }
       .icons a, .icons .icon-btn { @apply text-lg; }
-      .mobile-toggle { display: none; }
+      .mobile-toggle { display: none !important; }
     }
 
     /* ═══════════════════════════════════════════════════════
-       TABLET 768px–1199px: horizontal nav, hamburger for mobile menu
+       LARGE TABLET 1024px–1199px: centered nav, tighter equal gaps
        ═══════════════════════════════════════════════════════ */
-    @media (min-width: 768px) and (max-width: 1199px) {
-      .navbar { @apply px-5; gap: 4px; }
-      .menu { @apply flex; gap: 4px; }
-      .menu li a { @apply text-[9px] whitespace-nowrap; }
-      .icons { gap: 4px; }
+    @media (min-width: 1024px) and (max-width: 1199px) {
+      .navbar { @apply px-5; gap: 12px; }
+      .logo { @apply text-xl; }
+      .menu { @apply flex flex-1 justify-center; gap: 12px; }
+      .menu li a { font-size: 12px; }
+      .icons { gap: 16px; }
       .icons a, .icons .icon-btn { @apply text-base; }
       .mobile-toggle { @apply text-xl flex items-center justify-center; }
     }
 
     /* ═══════════════════════════════════════════════════════
-       MOBILE <768px: hide desktop nav, show hamburger
+       TABLET 768px–1023px: centered nav, compact equal gaps to keep TRACK/MY ORDERS visible
+       ═══════════════════════════════════════════════════════ */
+    @media (min-width: 768px) and (max-width: 1023px) {
+      .navbar { @apply px-4; gap: 10px; }
+      .logo { @apply text-lg; }
+      .menu { @apply flex flex-1 justify-center; gap: 8px; }
+      .menu li a { font-size: 11px; letter-spacing: 0.02em; }
+      .icons { gap: 12px; }
+      .icons a, .icons .icon-btn { font-size: 15px; }
+      .mobile-toggle { @apply text-lg flex items-center justify-center; }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       MOBILE <768px: hide desktop nav, keep icons grouped, show hamburger
        ═══════════════════════════════════════════════════════ */
     @media (max-width: 767px) {
-      .menu { display: none; }
-      .icons { gap: 10px; }
+      .navbar { gap: 10px; }
+      .menu { display: none !important; }
+      .icons { gap: 14px; }
       .icons a, .icons .icon-btn { @apply text-base; }
       .mobile-toggle { @apply text-lg flex items-center justify-center; }
     }
 
     /* ═══════════════════════════════════════════════════════
-       SMALL MOBILE ≤480px: tighter
+       SMALL MOBILE ≤480px: tighter — covers 425px, 390px, 375px
        ═══════════════════════════════════════════════════════ */
     @media (max-width: 480px) {
-      .navbar { @apply px-3 py-2.5; gap: 6px; }
-      .icons { gap: 6px; }
+      .navbar { @apply px-3 py-2.5; gap: 8px; }
+      .icons { gap: 12px; }
       .icons a, .icons .icon-btn { @apply text-base; }
       .mobile-toggle { @apply text-lg; }
     }
 
     /* ═══════════════════════════════════════════════════════
-       VERY SMALL ≤360px: tightest
+       VERY SMALL ≤360px: tightest — covers 320px
        ═══════════════════════════════════════════════════════ */
     @media (max-width: 360px) {
       .top-bar { @apply text-[10px] py-1.5 px-2; letter-spacing: 0.03em; }
-      .navbar { @apply px-2 py-2; gap: 4px; }
+      .navbar { @apply px-2 py-2; gap: 6px; }
       .logo { @apply text-sm min-w-0 shrink; }
-      .icons { gap: 4px; }
+      .icons { gap: 8px; }
       .icons a, .icons .icon-btn { @apply text-sm; }
       .mobile-toggle { @apply text-base; }
     }
