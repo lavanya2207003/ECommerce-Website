@@ -6,6 +6,7 @@ import { StoreProvider } from './context/StoreContext';
 import { ProductProvider } from './context/ProductContext';
 import { AdminAuthProvider } from './admin/context/AdminAuthContext';
 import ProtectedRoute from './admin/utils/ProtectedRoute';
+import PaymentProtectedRoute from './utils/PaymentProtectedRoute';
 import AdminLayout from './admin/layouts/AdminLayout';
 import LoginPage from './admin/pages/LoginPage';
 import Dashboard from './admin/pages/Dashboard';
@@ -117,7 +118,7 @@ export default function App() {
                   <Route path="/cart" element={<CartPage />} />
                   <Route path="/wishlist" element={<WishlistPage />} />
                   <Route path="/login" element={<LoginPageUser />} />
-                  <Route path="/payment" element={<PaymentPage />} />
+                  <Route path="/payment" element={<PaymentProtectedRoute><PaymentPage /></PaymentProtectedRoute>} />
                   <Route path="/payment-success" element={<OrderSuccessPage />} />
                   <Route path="/orders" element={<OrdersPage />} />
                   <Route path="/tracking" element={<TrackingPage />} />

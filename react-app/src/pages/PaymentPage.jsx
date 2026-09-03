@@ -1,8 +1,9 @@
 import { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
-
-const API_BASE = import.meta.env.VITE_API_URL || '';
+import { customerAPI } from '../services/api';
+import Icon from '../components/Icon';
+import ImageWithFallback from '../components/ImageWithFallback';
 
 export default function PaymentPage() {
   const { cart, clearCart, placeOrder } = useStore();
@@ -166,31 +167,15 @@ export default function PaymentPage() {
         order_notes: orderNotes,
       };
 
-      const response = await fetch(`${API_BASE}/api/payment/create-order`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: finalAmount, receipt: orderId, order_id: orderId }),
-      });
+      const result = await customerAPI.createOrder(orderData);
 
-      console.info('[payment] create-order response received', { status: response.status });
-      let result;
-      try {
-        result = await response.json();
-      } catch (parseError) {
-        console.error('[payment] create-order returned non-JSON response', { status: response.status });
-        throw new Error(`Payment service returned an invalid response (HTTP ${response.status}). Is the backend running?`);
-      }
+      console.info('[payment] create-order response received', { success: result.success });
 
       if (!result.success) {
-        throw new Error(result.error || `Failed to create payment order (HTTP ${response.status})`);
+        throw new Error(result.error || 'Failed to create payment order.');
       }
 
-      const razorpayOrder = result.order || {
-        id: result.order_id || result.orderId,
-        amount: result.amount,
-        currency: result.currency,
-      };
-      if (!result.key || !razorpayOrder.id) {
+      if (!result.key || !result.order?.id) {
         throw new Error('Payment gateway returned an incomplete order');
       }
 
@@ -199,20 +184,21 @@ export default function PaymentPage() {
 
       const options = {
         key: result.key,
-        amount: razorpayOrder.amount,
-        currency: razorpayOrder.currency,
-        order_id: razorpayOrder.id,
+        amount: result.order.amount,
+        currency: result.order.currency,
+        order_id: result.order.id,
         name: 'LayaStore',
         description: 'Order Payment',
-        handler: async (response) => {
+        handler: async (razorpayResponse) => {
           console.info('[payment] Razorpay payment success', {
-            order_id: response.razorpay_order_id,
-            payment_id: response.razorpay_payment_id,
+            order_id: razorpayResponse.razorpay_order_id,
+            payment_id: razorpayResponse.razorpay_payment_id,
           });
+
           const verifyData = {
-            razorpay_order_id: response.razorpay_order_id,
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_signature: response.razorpay_signature,
+            razorpay_order_id: razorpayResponse.razorpay_order_id,
+            razorpay_payment_id: razorpayResponse.razorpay_payment_id,
+            razorpay_signature: razorpayResponse.razorpay_signature,
             order_id: orderData.order_id,
             amount: finalAmount,
             currency: 'INR',
@@ -226,21 +212,8 @@ export default function PaymentPage() {
 
           try {
             console.info('[payment] sending verification request');
-            const verifyResponse = await fetch(`${API_BASE}/api/payment/verify`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(verifyData),
-            });
-
-            let verifyResult;
-            try {
-              verifyResult = await verifyResponse.json();
-            } catch (parseError) {
-              console.error('[payment] verify returned non-JSON response', { status: verifyResponse.status });
-              throw new Error('Payment verification failed. Please try again or contact support.');
-            }
+            const verifyResult = await customerAPI.verifyPayment(verifyData);
             console.info('[payment] verification response received', {
-              status: verifyResponse.status,
               success: verifyResult.success,
               verified: verifyResult.verified,
               duplicate: verifyResult.duplicate,
@@ -255,7 +228,7 @@ export default function PaymentPage() {
                 status: 'confirmed',
                 address,
                 delivery_address: orderData.delivery_address,
-                paymentId: response.razorpay_payment_id,
+                paymentId: razorpayResponse.razorpay_payment_id,
                 price_breakdown: orderData.price_breakdown,
                 delivery_info: orderData.delivery_info,
                 order_notes: orderNotes,
@@ -265,11 +238,7 @@ export default function PaymentPage() {
               placeOrder(order);
 
               try {
-                await fetch(`${API_BASE}/api/cart/clear`, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({}),
-                });
+                await customerAPI.clearCart();
               } catch (clearErr) {
                 console.warn('[payment] backend cart clear failed (ignored)', clearErr.message);
               }
@@ -278,10 +247,10 @@ export default function PaymentPage() {
               navigate('/order-success', {
                 state: {
                   orderId: order.id,
-                  razorpayOrderId: response.razorpay_order_id,
+                  razorpayOrderId: razorpayResponse.razorpay_order_id,
                   amount: finalAmount,
-                  paymentId: response.razorpay_payment_id,
-                  signature: response.razorpay_signature,
+                  paymentId: razorpayResponse.razorpay_payment_id,
+                  signature: razorpayResponse.razorpay_signature,
                   paymentMethod: verifyResult.payment?.method || 'razorpay',
                   paymentStatus: 'Paid',
                   transactionDate: new Date().toISOString(),
@@ -328,7 +297,7 @@ export default function PaymentPage() {
         setLoading(false);
         paymentInFlight.current = false;
       });
-      console.info('[payment] Opening Razorpay checkout', { order_id: razorpayOrder.id });
+      console.info('[payment] Opening Razorpay checkout', { order_id: result.order.id });
       rzp.open();
     } catch (err) {
       console.error('[payment] payment initiation failed', err);
@@ -343,7 +312,7 @@ export default function PaymentPage() {
   return <section className="checkout-section">
     <div className="checkout-container">
       <div className="checkout-hero">
-        <div className="checkout-badge"><i className="fa-solid fa-lock" /> Secure Checkout</div>
+        <div className="checkout-badge"><Icon name="lock" /> Secure Checkout</div>
         <h1>Checkout</h1>
         <p className="checkout-subtitle">Complete your order securely in just a few simple steps.</p>
         <div className="checkout-stepper">
@@ -357,7 +326,7 @@ export default function PaymentPage() {
               return <div className={`stepper-step ${step === i + 1 ? 'active' : ''} ${step >= i + 1 ? 'completed' : ''}`} key={i}>
                 <div className="stepper-circle">
                   <span className="stepper-num">{i + 1}</span>
-                  {step >= i + 1 && <i className="fa-solid fa-check" />}
+                  {step >= i + 1 && <Icon name="check" />}
                 </div>
                 <div className="stepper-info">
                   <div className="stepper-title">{t}</div>
@@ -368,9 +337,9 @@ export default function PaymentPage() {
           </div>
         </div>
         <div className="checkout-trust">
-          <div className="trust-item"><i className="fa-solid fa-shield-halved" /> Secure Payment</div>
-          <div className="trust-item"><i className="fa-solid fa-truck-fast" /> Fast Delivery</div>
-          <div className="trust-item"><i className="fa-solid fa-rotate-left" /> Easy Returns</div>
+          <div className="trust-item"><Icon name="shield-halved" /> Secure Payment</div>
+          <div className="trust-item"><Icon name="truck-fast" /> Fast Delivery</div>
+          <div className="trust-item"><Icon name="rotate-left" /> Easy Returns</div>
         </div>
       </div>
       <div className="checkout-body">
@@ -378,10 +347,10 @@ export default function PaymentPage() {
 
           {step === 1 && <div className="checkout-step-content">
             <h2>Delivery Address</h2>
-            {error && <div className="payment-error"><i className="fa-solid fa-circle-exclamation" /> {error}</div>}
+            {error && <div className="payment-error"><Icon name="circle-exclamation" /> {error}</div>}
 
             <div className="addr-form-section">
-              <h3><i className="fa-solid fa-user" /> Contact Details</h3>
+              <h3><Icon name="user" /> Contact Details</h3>
               <div className="addr-form-row">
                 <div className="addr-group">
                   <label htmlFor="name">Full Name <span className="req">*</span></label>
@@ -401,7 +370,7 @@ export default function PaymentPage() {
             </div>
 
             <div className="addr-form-section">
-              <h3><i className="fa-solid fa-house" /> Delivery Address</h3>
+              <h3><Icon name="house" /> Delivery Address</h3>
               <div className="addr-form-row">
                 <div className="addr-group">
                   <label htmlFor="line">House / Flat No. <span className="req">*</span></label>
@@ -441,12 +410,12 @@ export default function PaymentPage() {
             </div>
 
             <div className="addr-form-section">
-              <h3><i className="fa-solid fa-tag" /> Address Type</h3>
+              <h3><Icon name="tag" /> Address Type</h3>
               <div className="addr-type-row">
-                {[['home', 'Home', 'fa-house'], ['office', 'Office', 'fa-building'], ['other', 'Other', 'fa-location-dot']].map(([val, lbl, icon]) =>
+                {[['home', 'Home', 'house'], ['office', 'Office', 'building'], ['other', 'Other', 'location-dot']].map(([val, lbl, icon]) =>
                   <label key={val} className={`addr-type-btn ${address.address_type === val ? 'active' : ''}`}>
                     <input type="radio" name="address_type" value={val} checked={address.address_type === val} onChange={(e) => setAddress({ ...address, address_type: e.target.value })} />
-                    <i className={`fa-solid ${icon}`} /> {lbl}
+                    <Icon name={icon} /> {lbl}
                   </label>
                 )}
               </div>
@@ -457,21 +426,21 @@ export default function PaymentPage() {
             <div className="review-header-bar">
               <h2>Review Your Order</h2>
               <button type="button" className="review-edit-btn" onClick={() => setStep(1)}>
-                <i className="fa-solid fa-pen-to-square" /> Edit Address
+                <Icon name="pen-to-square" /> Edit Address
               </button>
             </div>
-            {error && <div className="review-error"><i className="fa-solid fa-circle-exclamation" /> {error}</div>}
+            {error && <div className="review-error"><Icon name="circle-exclamation" /> {error}</div>}
 
             <div className="review-layout">
               <div className="review-left-col">
 
                 <div className="review-card">
                   <div className="review-card-head">
-                    <div className="review-card-head-icon"><i className="fa-solid fa-location-dot" /></div>
+                    <div className="review-card-head-icon"><Icon name="location-dot" /></div>
                     <div>
                       <h3>Delivery Address</h3>
                       <span className={`review-addr-type-badge ${address.address_type || 'home'}`}>
-                        <i className={`fa-solid ${address.address_type === 'office' ? 'fa-building' : address.address_type === 'other' ? 'fa-location-dot' : 'fa-house'}`} />
+                        <Icon name={address.address_type === 'office' ? 'building' : address.address_type === 'other' ? 'location-dot' : 'house'} />
                         {address.address_type === 'office' ? 'Office' : address.address_type === 'other' ? 'Other' : 'Home'}
                       </span>
                     </div>
@@ -480,17 +449,17 @@ export default function PaymentPage() {
                     <p className="review-addr-name">{address.name}</p>
                     <p>{address.line}{address.street ? `, ${address.street}` : ''}{address.area ? `, ${address.area}` : ''}</p>
                     <p>{address.city}, {address.state} - {address.pincode}</p>
-                    {address.landmark && <p className="review-landmark"><i className="fa-solid fa-map-pin" /> {address.landmark}</p>}
+                    {address.landmark && <p className="review-landmark"><Icon name="map-pin" /> {address.landmark}</p>}
                     <div className="review-contact">
-                      <div className="review-contact-row"><i className="fa-solid fa-phone" /><span>{address.phone}</span></div>
-                      <div className="review-contact-row"><i className="fa-solid fa-envelope" /><span>{address.email}</span></div>
+                      <div className="review-contact-row"><Icon name="phone" /><span>{address.phone}</span></div>
+                      <div className="review-contact-row"><Icon name="envelope" /><span>{address.email}</span></div>
                     </div>
                   </div>
                 </div>
 
                 <div className="review-card">
                   <div className="review-card-head">
-                    <div className="review-card-head-icon"><i className="fa-solid fa-bag-shopping" /></div>
+                    <div className="review-card-head-icon"><Icon name="bag-shopping" /></div>
                     <div>
                       <h3>Ordered Products</h3>
                       <span className="review-product-count">{cart.length} {cart.length === 1 ? 'item' : 'items'}</span>
@@ -499,18 +468,18 @@ export default function PaymentPage() {
                   <div className="review-card-body">
                     <div className="review-products-list">
                       {cart.map(item => <div key={item.id} className="review-product-item">
-                        <img src={item.image} alt={item.name} className="review-product-img" />
+                        <ImageWithFallback src={item.image} alt={item.name} className="review-product-img" />
                         <div className="review-product-info">
                           {item.brand && <span className="review-product-brand">{item.brand}</span>}
                           <h4>{item.name}</h4>
                           <div className="review-product-meta">
-                            {item.size && <span><i className="fa-solid fa-ruler" /> {item.size}</span>}
-                            {item.color && <span><i className="fa-solid fa-palette" /> {item.color}</span>}
-                            <span><i className="fa-solid fa-layer-group" /> Qty: {item.quantity}</span>
+                            {item.size && <span><Icon name="ruler" /> {item.size}</span>}
+                            {item.color && <span><Icon name="tag" /> {item.color}</span>}
+                            <span><Icon name="layer-group" /> Qty: {item.quantity}</span>
                           </div>
                           <div className="review-product-pricing">
                             <span className="review-unit-price">₹{item.price} × {item.quantity}</span>
-                            {(item.discount || 0) > 0 && <span className="review-discount-tag"><i className="fa-solid fa-tag" /> -{item.discount}%</span>}
+                            {(item.discount || 0) > 0 && <span className="review-discount-tag"><Icon name="tag" /> -{item.discount}%</span>}
                             <strong className="review-item-total">₹{item.price * item.quantity - (item.discount || 0) * item.quantity}</strong>
                           </div>
                         </div>
@@ -521,7 +490,7 @@ export default function PaymentPage() {
 
                 <div className="review-card">
                   <div className="review-card-head">
-                    <div className="review-card-head-icon"><i className="fa-solid fa-truck-fast" /></div>
+                    <div className="review-card-head-icon"><Icon name="truck-fast" /></div>
                     <div>
                       <h3>Delivery Details</h3>
                     </div>
@@ -529,21 +498,21 @@ export default function PaymentPage() {
                   <div className="review-card-body">
                     <div className="review-delivery-grid">
                       <div className="review-delivery-cell">
-                        <i className="fa-solid fa-calendar-check" />
+                        <Icon name="calendar-check" />
                         <div>
                           <strong>Expected Delivery</strong>
                           <span>{formattedDate}</span>
                         </div>
                       </div>
                       <div className="review-delivery-cell">
-                        <i className="fa-solid fa-truck" />
+                        <Icon name="truck" />
                         <div>
                           <strong>Shipping Method</strong>
                           <span>Standard Delivery</span>
                         </div>
                       </div>
                       <div className="review-delivery-cell">
-                        <i className="fa-solid fa-indian-rupee-sign" />
+                        <Icon name="dollar-sign" />
                         <div>
                           <strong>Delivery Charges</strong>
                           <span>{deliveryCharges === 0 ? 'Free' : `₹${deliveryCharges}`}</span>
@@ -552,10 +521,10 @@ export default function PaymentPage() {
                     </div>
                     <div className="review-delivery-speed">
                       <button type="button" className={`speed-btn ${deliveryDays === 7 ? 'active' : ''}`} onClick={() => setDeliveryDays(7)}>
-                        <i className="fa-solid fa-box" /> Standard (5-7 days)
+                        <Icon name="box" /> Standard (5-7 days)
                       </button>
                       <button type="button" className={`speed-btn ${deliveryDays === 3 ? 'active' : ''}`} onClick={() => setDeliveryDays(3)}>
-                        <i className="fa-solid fa-bolt" /> Express (3-5 days, +₹99)
+                        <Icon name="bolt" /> Express (3-5 days, +₹99)
                       </button>
                     </div>
                   </div>
@@ -563,7 +532,7 @@ export default function PaymentPage() {
 
                 <div className="review-card">
                   <div className="review-card-head">
-                    <div className="review-card-head-icon"><i className="fa-solid fa-tag" /></div>
+                    <div className="review-card-head-icon"><Icon name="tag" /></div>
                     <div>
                       <h3>Coupon</h3>
                     </div>
@@ -571,9 +540,9 @@ export default function PaymentPage() {
                   <div className="review-card-body">
                     {appliedCoupon ? (
                       <div className="review-applied-coupon">
-                        <div className="coupon-badge"><i className="fa-solid fa-check-circle" /> {appliedCoupon.code}</div>
+                        <div className="coupon-badge"><Icon name="circle-check" /> {appliedCoupon.code}</div>
                         <span>{appliedCoupon.description} — ₹{couponDiscount} off</span>
-                        <button type="button" className="coupon-remove" onClick={removeCoupon}><i className="fa-solid fa-xmark" /></button>
+                        <button type="button" className="coupon-remove" onClick={removeCoupon}><Icon name="xmark" /></button>
                       </div>
                     ) : (
                       <div className="review-coupon-input">
@@ -586,7 +555,7 @@ export default function PaymentPage() {
 
                 <div className="review-card">
                   <div className="review-card-head">
-                    <div className="review-card-head-icon"><i className="fa-solid fa-note-sticky" /></div>
+                    <div className="review-card-head-icon"><Icon name="note-sticky" /></div>
                     <div>
                       <h3>Order Notes</h3>
                     </div>
@@ -599,7 +568,7 @@ export default function PaymentPage() {
 
                 <div className="review-card review-security-card">
                   <div className="review-security-body">
-                    <i className="fa-solid fa-lock" />
+                    <Icon name="lock" />
                     <div>
                       <strong>Secure Payment</strong>
                       <span>Your payment is processed securely by Razorpay using 256-bit encryption.</span>
@@ -628,17 +597,17 @@ export default function PaymentPage() {
                 handlePayment();
               }
             }}>
-              {loading ? 'Processing...' : step === 1 ? 'Continue' : <><i className="fa-solid fa-lock" /> Place Order · ₹{finalAmount}</>}
+              {loading ? 'Processing...' : step === 1 ? 'Continue' : <><Icon name="lock" /> Place Order · ₹{finalAmount}</>}
             </button>
           </div>
         </form>
 
         <aside className="checkout-sidebar">
           <div className="order-summary">
-            <div className="order-summary-header"><h3><i className="fa-solid fa-receipt" /> Price Summary</h3></div>
+            <div className="order-summary-header"><h3><Icon name="receipt" /> Price Summary</h3></div>
             <div className="order-summary-body">
               {cart.map(item => <div key={item.id} className="order-summary-item">
-                <img src={item.image} alt={item.name} className="order-summary-thumb" />
+                <ImageWithFallback src={item.image} alt={item.name} className="order-summary-thumb" />
                 <div className="order-summary-item-info">
                   <span className="order-summary-item-name">{item.name}</span>
                   <span className="order-summary-item-qty">Qty: {item.quantity}</span>
@@ -659,11 +628,11 @@ export default function PaymentPage() {
               </div>
               {(itemDiscount + couponDiscount) > 0 && (
                 <div className="order-summary-savings">
-                  <i className="fa-solid fa-tags" /> You save ₹{itemDiscount + couponDiscount}
+                  <Icon name="tags" /> You save ₹{itemDiscount + couponDiscount}
                 </div>
               )}
               <div className="order-summary-security">
-                <i className="fa-solid fa-lock" />
+                <Icon name="lock" />
                 <span>Secure payment powered by Razorpay.</span>
               </div>
             </div>

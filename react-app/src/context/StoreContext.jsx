@@ -15,12 +15,16 @@ export function StoreProvider({ children }) {
   const [cart, setCart] = useState(() => read('shoppingCart', []));
   const [wishlist, setWishlist] = useState(() => cleanUniqueIds(read('layaWishlist', [])));
   const [orders, setOrders] = useState(() => read('layaOrders', []));
+  const [user, setUser] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('user')) ?? null; } catch { return null; }
+  });
   const [message, setMessage] = useState('');
   const [quickViewProduct, setQuickViewProduct] = useState(null);
 
   useEffect(() => localStorage.setItem('shoppingCart', JSON.stringify(cart)), [cart]);
   useEffect(() => localStorage.setItem('layaWishlist', JSON.stringify(wishlist)), [wishlist]);
   useEffect(() => localStorage.setItem('layaOrders', JSON.stringify(orders)), [orders]);
+  useEffect(() => localStorage.setItem('user', JSON.stringify(user)), [user]);
 
   const notify = text => {
     setMessage(text);
@@ -38,10 +42,23 @@ export function StoreProvider({ children }) {
     notify(`${product.name} added to cart`);
   };
 
+  const setUserState = (userData) => {
+    if (userData) {
+      localStorage.setItem('user', JSON.stringify(userData));
+      if (userData.token) localStorage.setItem('userToken', userData.token);
+    } else {
+      localStorage.removeItem('user');
+      localStorage.removeItem('userToken');
+    }
+    setUser(userData);
+  };
+
   const value = useMemo(() => ({
     cart,
     wishlist,
     orders,
+    user,
+    setUser: setUserState,
     addToCart,
     removeFromCart: id => setCart(x => x.filter(i => i.id !== id)),
     changeQuantity: (id, quantity) => setCart(x => quantity < 1 ? x.filter(i => i.id !== id) : x.map(i => i.id === id ? { ...i, quantity } : i)),
@@ -61,7 +78,7 @@ export function StoreProvider({ children }) {
     quickViewProduct,
     openQuickView: setQuickViewProduct,
     closeQuickView: () => setQuickViewProduct(null),
-  }), [cart, wishlist, orders, quickViewProduct]);
+  }), [cart, wishlist, orders, user, quickViewProduct]);
 
   return (
     <StoreContext.Provider value={value}>
