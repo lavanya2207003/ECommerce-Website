@@ -22,6 +22,7 @@ export default function PaymentPage() {
   const paymentInFlight = useRef(false);
 
   const sanitizeName = (v) => v.replace(/[^A-Za-z ]/g, '');
+  const sanitizeHouse = (v) => v.replace(/\D/g, '').slice(0, 6);
   const sanitizePhone = (v) => v.replace(/\D/g, '').slice(0, 10);
   const sanitizePincode = (v) => v.replace(/\D/g, '').slice(0, 6);
   const sanitizeCityState = (v) => v.replace(/[^A-Za-z ]/g, '');
@@ -45,6 +46,7 @@ export default function PaymentPage() {
         return '';
       case 'line':
         if (!val) return 'House / Flat No. is required';
+        if (!/^\d{1,6}$/.test(val)) return 'House / Flat No. must be 1-6 digits (numbers only)';
         return '';
       case 'city':
         if (!val) return 'City is required';
@@ -522,8 +524,17 @@ export default function PaymentPage() {
               <div className="addr-form-row">
                 <div className="addr-group">
                   <label htmlFor="line">House / Flat No. <span className="req">*</span></label>
-                  <input id="line" type="text" placeholder="Flat / House No." value={address.line || ''}
-                    onChange={(e) => { setAddress({ ...address, line: e.target.value }); if (fieldErrors.line) clearFieldError('line'); }}
+                  <input id="line" type="text" inputMode="numeric" placeholder="Flat / House No." value={address.line || ''} maxLength={6}
+                    onChange={(e) => {
+                      const v = sanitizeHouse(e.target.value);
+                      setAddress({ ...address, line: v });
+                      if (fieldErrors.line) clearFieldError('line');
+                    }}
+                    onPaste={(e) => {
+                      e.preventDefault();
+                      const v = sanitizeHouse(e.clipboardData.getData('text') || '');
+                      setAddress((prev) => ({ ...prev, line: v }));
+                    }}
                     onBlur={(e) => {
                       const v = e.target.value.trim();
                       setAddress((prev) => ({ ...prev, line: v }));
