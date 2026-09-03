@@ -1592,7 +1592,7 @@
       background: linear-gradient(90, #7C3AED, #A855F7);
     }
     .stepper-remaining { @apply h-full bg-gray-200 transition-all duration-300 ease-out; }
-    .stepper-steps { @apply flex justify-between relative z-10; }
+    .stepper-steps { @apply flex justify-center gap-6 md:gap-8 relative z-10; }
     .stepper-step {
       @apply flex flex-col items-center relative z-20;
     }
