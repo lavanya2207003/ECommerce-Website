@@ -144,6 +144,7 @@
     .navbar {
       @apply flex items-center px-4 py-3 max-w-7xl mx-auto;
       gap: 0;
+      overflow-x: hidden;
     }
     .navbar > * { flex-shrink: 0; min-width: 0; }
     .icons { flex-shrink: 1; }
@@ -209,30 +210,25 @@
     }
 
     /* ═══════════════════════════════════════════════════════
-       TABLET ≤1199px: hamburger, no desktop nav
-       ═══════════════════════════════════════════════════════ */
-    @media (max-width: 1199px) {
-      .menu { display: none !important; }
-      .mobile-toggle { @apply flex items-center justify-center; }
-    }
-
-    /* ═══════════════════════════════════════════════════════
-       LARGE TABLET 768px–1199px: medium spacing
+       TABLET 768px–1199px: horizontal nav, hamburger for mobile menu
        ═══════════════════════════════════════════════════════ */
     @media (min-width: 768px) and (max-width: 1199px) {
-      .navbar { @apply px-5; gap: 16px; }
-      .icons { gap: 12px; }
+      .navbar { @apply px-5; gap: 10px; }
+      .menu { @apply flex; gap: 10px; }
+      .menu li a { @apply text-xs; }
+      .icons { gap: 8px; }
       .icons a, .icons .icon-btn { @apply text-base; }
-      .mobile-toggle { @apply text-xl; }
+      .mobile-toggle { @apply text-xl flex items-center justify-center; }
     }
 
     /* ═══════════════════════════════════════════════════════
-       MOBILE ≤767px: compact spacing
+       MOBILE <768px: hide desktop nav, show hamburger
        ═══════════════════════════════════════════════════════ */
     @media (max-width: 767px) {
+      .menu { display: none; }
       .icons { gap: 10px; }
       .icons a, .icons .icon-btn { @apply text-base; }
-      .mobile-toggle { @apply text-lg; }
+      .mobile-toggle { @apply text-lg flex items-center justify-center; }
     }
 
     /* ═══════════════════════════════════════════════════════
