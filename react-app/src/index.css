@@ -1563,7 +1563,8 @@
 
   @layer components {
     .checkout-section {
-      @apply py-24 px-4;
+      @apply px-4 pb-24;
+      padding-top: calc(var(--header-offset) + 32px);
       background: linear-gradient(180deg, #FAFAFC 0%, #F3F0FF 50%, #FAFAFC 100%);
       position: relative;
       overflow: hidden;
@@ -1702,7 +1703,7 @@
       .order-summary { @apply p-4; }
     }
     @media (max-width: 360px) {
-      .checkout-section { @apply py-12 px-2; }
+      .checkout-section { @apply px-2 pb-12; padding-top: calc(var(--header-offset) + 20px); }
       .checkout-hero h1 { @apply text-base; }
       .checkout-step-content { @apply p-3; }
       .checkout-step-content h2 { @apply text-base mb-3; }
