@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
 import { customerAPI } from '../services/api';
@@ -11,6 +11,7 @@ export default function PaymentPage() {
   const [step, setStep] = useState(1);
   const [address, setAddress] = useState({});
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState('');
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState(null);
@@ -18,6 +19,43 @@ export default function PaymentPage() {
   const [orderNotes, setOrderNotes] = useState('');
   const [deliveryDays, setDeliveryDays] = useState(7);
   const paymentInFlight = useRef(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadPaymentData = async () => {
+      try {
+        const profileRes = await customerAPI.getProfile();
+        const profile = profileRes?.data?.customer;
+        if (!cancelled && profile) {
+          setAddress(prev => ({
+            ...prev,
+            name: profile.name || '',
+            email: profile.email || '',
+            phone: profile.phone || '',
+          }));
+        }
+        const cartRes = await customerAPI.getCart();
+        const cartData = cartRes?.data?.data || cartRes?.data || [];
+        if (!cancelled && (!Array.isArray(cartData) || cartData.length === 0)) {
+          navigate('/cart', { replace: true });
+        }
+      } catch (err) {
+        if (!cancelled) {
+          if (err?.status === 401 || err?.status === 403) {
+            navigate('/login', { replace: true });
+          } else {
+            setError('Failed to load checkout data. Please try again.');
+          }
+        }
+      } finally {
+        if (!cancelled) {
+          setInitialLoading(false);
+        }
+      }
+    };
+    loadPaymentData();
+    return () => { cancelled = true; };
+  }, [navigate]);
 
   const totalMRP = cart.reduce((s, x) => s + x.price * x.quantity, 0);
   const itemDiscount = cart.reduce((s, x) => s + ((x.discount || 0) * x.quantity), 0);
@@ -89,7 +127,6 @@ export default function PaymentPage() {
   };
 
   const handlePayment = async () => {
-    console.info('[payment] Place Order clicked', { amount: finalAmount, items: cart.length });
     setError('');
 
     if (!cart.length) {
@@ -105,7 +142,6 @@ export default function PaymentPage() {
     }
 
     if (paymentInFlight.current) {
-      console.warn('[payment] duplicate Place Order click ignored');
       return;
     }
     paymentInFlight.current = true;
@@ -169,8 +205,6 @@ export default function PaymentPage() {
 
       const result = await customerAPI.createOrder(orderData);
 
-      console.info('[payment] create-order response received', { success: result.success });
-
       if (!result.success) {
         throw new Error(result.error || 'Failed to create payment order.');
       }
@@ -180,7 +214,6 @@ export default function PaymentPage() {
       }
 
       await loadRazorpayScript();
-      console.info('[payment] Razorpay checkout script loaded');
 
       const options = {
         key: result.key,
@@ -190,11 +223,6 @@ export default function PaymentPage() {
         name: 'LayaStore',
         description: 'Order Payment',
         handler: async (razorpayResponse) => {
-          console.info('[payment] Razorpay payment success', {
-            order_id: razorpayResponse.razorpay_order_id,
-            payment_id: razorpayResponse.razorpay_payment_id,
-          });
-
           const verifyData = {
             razorpay_order_id: razorpayResponse.razorpay_order_id,
             razorpay_payment_id: razorpayResponse.razorpay_payment_id,
@@ -211,13 +239,7 @@ export default function PaymentPage() {
           };
 
           try {
-            console.info('[payment] sending verification request');
             const verifyResult = await customerAPI.verifyPayment(verifyData);
-            console.info('[payment] verification response received', {
-              success: verifyResult.success,
-              verified: verifyResult.verified,
-              duplicate: verifyResult.duplicate,
-            });
 
             if (verifyResult.success && verifyResult.verified) {
               const order = {
@@ -240,7 +262,7 @@ export default function PaymentPage() {
               try {
                 await customerAPI.clearCart();
               } catch (clearErr) {
-                console.warn('[payment] backend cart clear failed (ignored)', clearErr.message);
+                clearCart();
               }
 
               clearCart();
@@ -267,7 +289,6 @@ export default function PaymentPage() {
               setError(verifyResult.error || 'Payment verification failed. Please try again.');
             }
           } catch (verifyError) {
-            console.error('[payment] verification request failed', verifyError);
             setError(verifyError.message || 'Payment verification failed. Please try again or contact support.');
           } finally {
             setLoading(false);
@@ -282,7 +303,6 @@ export default function PaymentPage() {
         theme: { color: '#7C3AED' },
         modal: {
           ondismiss: () => {
-            console.info('[payment] Razorpay checkout dismissed');
             setLoading(false);
             paymentInFlight.current = false;
             setError('Payment was cancelled. Your cart is still saved; you can try again.');
@@ -292,20 +312,25 @@ export default function PaymentPage() {
 
       const rzp = new window.Razorpay(options);
       rzp.on('payment.failed', (event) => {
-        console.error('[payment] Razorpay payment failed', event.error);
         setError(event.error.description || 'Payment failed. Please try again.');
         setLoading(false);
         paymentInFlight.current = false;
       });
-      console.info('[payment] Opening Razorpay checkout', { order_id: result.order.id });
       rzp.open();
     } catch (err) {
-      console.error('[payment] payment initiation failed', err);
       setError(err.message || 'Failed to initiate payment. Please try again.');
       setLoading(false);
       paymentInFlight.current = false;
     }
   };
+
+  if (initialLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
 
   if (!cart.length) return <div className="react-empty"><h2>Your cart is empty</h2><Link to="/shop">Shop now</Link></div>;
 

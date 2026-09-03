@@ -50,6 +50,11 @@ api.interceptors.response.use(
           message: data?.message || 'Session expired. Please login again.',
         });
       case 403:
+        localStorage.removeItem('userToken');
+        localStorage.removeItem('user');
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
         return Promise.reject({
           status,
           message: data?.error || data?.message || 'Access denied.',
@@ -80,6 +85,8 @@ api.interceptors.response.use(
 
 export const customerAPI = {
   getProfile: () => api.get('/api/customer/auth/me'),
+
+  getCart: () => api.get('/api/cart'),
 
   createOrder: (data) => api.post('/api/payment/create-order', data),
 

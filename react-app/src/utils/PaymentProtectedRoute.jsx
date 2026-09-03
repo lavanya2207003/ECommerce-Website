@@ -5,33 +5,36 @@ import { customerAPI } from '../services/api';
 
 export default function PaymentProtectedRoute({ children }) {
   const location = useLocation();
-  const { cart, user } = useStore();
+  const { token } = useStore();
   const [checkingAuth, setCheckingAuth] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  const hasValidCart = cart && cart.length > 0;
-  const hasUser = user && user.id;
+  const [authError, setAuthError] = useState(null);
 
   useEffect(() => {
     const verifyAuth = async () => {
-      if (!hasUser || !localStorage.getItem('userToken')) {
-        setIsAuthenticated(false);
+      setAuthError(null);
+
+      if (!token) {
         setCheckingAuth(false);
         return;
       }
 
       try {
-        const response = await customerAPI.getProfile();
-        setIsAuthenticated(true);
-      } catch {
-        setIsAuthenticated(false);
+        const profileRes = await customerAPI.getProfile();
+        const cartRes = await customerAPI.getCart();
+        const cartData = cartRes?.data?.data || cartRes?.data || [];
+        if (!Array.isArray(cartData) || cartData.length === 0) {
+          setCheckingAuth(false);
+          return;
+        }
+      } catch (err) {
+        setAuthError(err?.message || 'Verification failed');
       } finally {
         setCheckingAuth(false);
       }
     };
 
     verifyAuth();
-  }, [user, hasUser]);
+  }, [token]);
 
   if (checkingAuth) {
     return (
@@ -41,14 +44,8 @@ export default function PaymentProtectedRoute({ children }) {
     );
   }
 
-  if (!isAuthenticated) {
-    localStorage.removeItem('userToken');
-    localStorage.removeItem('user');
+  if (!token || authError) {
     return <Navigate to="/login" replace state={{ from: location }} />;
-  }
-
-  if (!hasValidCart) {
-    return <Navigate to="/cart" replace state={{ from: location }} />;
   }
 
   return children;
