@@ -483,20 +483,26 @@
       box-shadow: 0 2px 8px rgba(124,58,237,0.2);
     }
     .btn-action.btn-addtocart:hover { background: linear-gradient(135deg, #6D28D9 0%, #9333EA 100%); box-shadow: 0 4px 12px rgba(124,58,237,0.35); }
-    .product-details { @apply p-4; }
-    .product-title { @apply text-sm font-semibold text-gray-800 mb-1 truncate; }
-    .product-rating { @apply text-[10px] text-yellow-400 mb-1.5; }
-    .product-rating i { @apply mr-0.5; }
-    .product-description { @apply text-xs text-gray-500 mb-2 line-clamp-2; }
-    .product-price { @apply text-base font-bold text-purple-700; }
+    .product-card { @apply flex flex-col; }
+    .product-details { @apply p-4 flex flex-col flex-1; }
+    .product-title { @apply text-sm font-semibold text-gray-800 truncate leading-tight; min-height: 20px; margin-bottom: 2px; }
+    .product-details > p.text-xs { min-height: 16px; }
+    .product-rating { @apply flex flex-row items-center gap-0.5 flex-nowrap shrink-0 text-yellow-400 leading-none; height: 14px; min-height: 14px; margin-bottom: 6px; flex-shrink: 0; }
+    .product-rating svg { @apply w-3 h-3 shrink-0 block; }
+    .product-rating i { @apply mr-0; }
+    .product-description { @apply text-xs text-gray-500 line-clamp-2 leading-4; min-height: 32px; margin-bottom: 8px; flex-shrink: 0; }
+    .product-price { @apply text-base font-bold text-purple-700 mt-auto; }
     @media (max-width: 767px) {
       .products-section { @apply py-10 px-3; }
       .products-grid { @apply grid-cols-2 gap-3; }
       .product-card { @apply rounded-lg; }
       .product-image-wrapper { aspect-ratio: 4/5; }
       .product-details { @apply p-2.5; }
-      .product-title { @apply text-xs; }
-      .product-description { @apply text-[10px] mb-1; }
+      .product-title { @apply text-xs; min-height: 16px; }
+      .product-details > p.text-xs { min-height: 14px; }
+      .product-rating { height: 12px; min-height: 12px; gap: 2px; margin-bottom: 4px; }
+      .product-rating svg { @apply w-2.5 h-2.5; }
+      .product-description { @apply text-[10px] mb-1; min-height: 28px; }
       .product-price { @apply text-sm; }
       .product-badge { @apply text-[8px] px-2 py-0.5; }
       .section-header h2 { @apply text-xl; }
@@ -510,7 +516,11 @@
       .products-section { @apply py-6 px-2; }
       .products-grid { @apply gap-2; }
       .product-details { @apply p-2; }
-      .product-title { @apply text-[10px]; }
+      .product-title { @apply text-[10px]; min-height: 14px; }
+      .product-details > p.text-xs { min-height: 12px; }
+      .product-rating { height: 10px; min-height: 10px; gap: 1.5px; margin-bottom: 3px; }
+      .product-rating svg { @apply w-2 h-2; }
+      .product-description { min-height: 26px; }
       .product-price { @apply text-xs; }
       .section-header h2 { @apply text-lg; }
       .section-tag { @apply text-[8px] px-2.5 py-1; }
