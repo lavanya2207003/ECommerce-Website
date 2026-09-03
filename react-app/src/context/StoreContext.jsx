@@ -25,7 +25,10 @@ export function StoreProvider({ children }) {
   useEffect(() => localStorage.setItem('shoppingCart', JSON.stringify(cart)), [cart]);
   useEffect(() => localStorage.setItem('layaWishlist', JSON.stringify(wishlist)), [wishlist]);
   useEffect(() => localStorage.setItem('layaOrders', JSON.stringify(orders)), [orders]);
-  useEffect(() => localStorage.setItem('user', JSON.stringify(user)), [user]);
+  useEffect(() => {
+    if (user) localStorage.setItem('user', JSON.stringify(user));
+    else localStorage.removeItem('user');
+  }, [user]);
   useEffect(() => {
     if (token) localStorage.setItem('userToken', token);
     else localStorage.removeItem('userToken');

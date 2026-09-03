@@ -29,22 +29,16 @@ export default function PaymentPage() {
         if (!cancelled && profile) {
           setAddress(prev => ({
             ...prev,
-            name: profile.name || '',
-            email: profile.email || '',
-            phone: profile.phone || '',
+            name: profile.name || prev.name || '',
+            email: profile.email || prev.email || '',
+            phone: profile.phone || prev.phone || '',
           }));
-        }
-        const cartRes = await customerAPI.getCart();
-        const cartData = cartRes?.data?.data || cartRes?.data || [];
-        if (!cancelled && (!Array.isArray(cartData) || cartData.length === 0)) {
-          navigate('/cart', { replace: true });
         }
       } catch (err) {
         if (!cancelled) {
           if (err?.status === 401 || err?.status === 403) {
             navigate('/login', { replace: true });
-          } else {
-            setError('Failed to load checkout data. Please try again.');
+            return;
           }
         }
       } finally {
@@ -203,7 +197,8 @@ export default function PaymentPage() {
         order_notes: orderNotes,
       };
 
-      const result = await customerAPI.createOrder(orderData);
+      const response = await customerAPI.createOrder(orderData);
+      const result = response?.data || response;
 
       if (!result.success) {
         throw new Error(result.error || 'Failed to create payment order.');
@@ -239,7 +234,8 @@ export default function PaymentPage() {
           };
 
           try {
-            const verifyResult = await customerAPI.verifyPayment(verifyData);
+            const verifyResponse = await customerAPI.verifyPayment(verifyData);
+            const verifyResult = verifyResponse?.data || verifyResponse;
 
             if (verifyResult.success && verifyResult.verified) {
               const order = {
@@ -261,8 +257,8 @@ export default function PaymentPage() {
 
               try {
                 await customerAPI.clearCart();
-              } catch (clearErr) {
-                clearCart();
+              } catch {
+                // fallback to local clear already handled below
               }
 
               clearCart();
@@ -289,6 +285,10 @@ export default function PaymentPage() {
               setError(verifyResult.error || 'Payment verification failed. Please try again.');
             }
           } catch (verifyError) {
+            if (verifyError?.status === 401 || verifyError?.status === 403) {
+              navigate('/login', { replace: true });
+              return;
+            }
             setError(verifyError.message || 'Payment verification failed. Please try again or contact support.');
           } finally {
             setLoading(false);
@@ -318,6 +318,10 @@ export default function PaymentPage() {
       });
       rzp.open();
     } catch (err) {
+      if (err?.status === 401 || err?.status === 403) {
+        navigate('/login', { replace: true });
+        return;
+      }
       setError(err.message || 'Failed to initiate payment. Please try again.');
       setLoading(false);
       paymentInFlight.current = false;
