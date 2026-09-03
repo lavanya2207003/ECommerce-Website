@@ -213,10 +213,10 @@
        TABLET 768px–1199px: horizontal nav, hamburger for mobile menu
        ═══════════════════════════════════════════════════════ */
     @media (min-width: 768px) and (max-width: 1199px) {
-      .navbar { @apply px-5; gap: 10px; }
-      .menu { @apply flex; gap: 10px; }
-      .menu li a { @apply text-xs; }
-      .icons { gap: 8px; }
+      .navbar { @apply px-5; gap: 4px; }
+      .menu { @apply flex; gap: 4px; }
+      .menu li a { @apply text-[9px] whitespace-nowrap; }
+      .icons { gap: 4px; }
       .icons a, .icons .icon-btn { @apply text-base; }
       .mobile-toggle { @apply text-xl flex items-center justify-center; }
     }
