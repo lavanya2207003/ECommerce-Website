@@ -142,7 +142,7 @@
       @apply flex items-center px-4 py-3 max-w-7xl mx-auto;
       gap: 0;
     }
-    .navbar > * { flex-shrink: 0; }
+    .navbar > * { flex-shrink: 0; min-width: 0; }
 
     /* Logo */
     .logo {
@@ -790,13 +790,14 @@
 
       /* Filter sidebar becomes a slide-in drawer on mobile */
       .filter-sidebar {
-        @apply fixed left-0 z-[45] w-72 max-w-[85vw] bg-white overflow-y-auto transform translate-x-full transition-transform duration-300 flex flex-col;
+        @apply fixed left-0 z-[45] w-72 max-w-[85vw] bg-white overflow-y-auto transition-transform duration-300 flex flex-col;
         top: var(--header-offset);
         bottom: 0;
         padding: 1rem 1.25rem;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.18);
+        transform: translateX(-110%);
       }
-      .filter-sidebar.open { @apply translate-x-0; }
+      .filter-sidebar.open { transform: translateX(0); }
       .filter-overlay { @apply fixed inset-0 bg-black/40 z-[40]; }
       .filter-toggle {
         @apply flex items-center gap-2 px-4 py-2.5 rounded-lg bg-purple-600 text-white text-sm font-semibold border-none cursor-pointer;
