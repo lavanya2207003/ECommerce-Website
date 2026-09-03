@@ -2,12 +2,16 @@ import { Link } from 'react-router-dom';
 import { useEffect, useMemo } from 'react';
 import { useStore } from '../context/StoreContext';
 import { useProducts } from '../context/ProductContext';
+import Icon from '../components/Icon';
+import ImageWithFallback from '../components/ImageWithFallback';
+
+const PLACEHOLDER_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='600' viewBox='0 0 500 600'%3E%3Crect fill='%23f1f5f9' width='500' height='600'/%3E%3Cg transform='translate(200,250)'%3E%3Crect fill='%23e2e8f0' x='40' y='0' width='60' height='60' rx='8'/%3E%3Ccircle fill='%23cbd5e1' cx='70' cy='20' r='12'/%3E%3Cpath fill='%23cbd5e1' d='M50 48 L70 28 L90 48' stroke='%23cbd5e1' stroke-width='4' fill='none'/%3E%3C/g%3E%3Ctext x='250' y='340' text-anchor='middle' fill='%2394a3b8' font-family='Inter,system-ui,sans-serif' font-size='14'%3ENo Image%3C/text%3E%3C/svg%3E";
 
 function getProductImage(product) {
   if (product.images && product.images.length > 0 && product.images[0]) {
     return product.images[0];
   }
-  return product.image || 'https://via.placeholder.com/500x600?text=No+Image';
+  return product.image || PLACEHOLDER_SVG;
 }
 
 function getProductPrice(product) {
@@ -24,9 +28,9 @@ function WishlistCard({ product }) {
     <article className="wishlist-card">
       <div className="wishlist-card-image">
         <Link to={`/product/${pid}`}>
-          <img src={getProductImage(product)} alt={product.name} />
+          <ImageWithFallback src={getProductImage(product)} alt={product.name} />
         </Link>
-        <button className="wishlist-heart-btn active" onClick={() => toggleWishlist(pid)} aria-label="Remove from wishlist"><i className="fa-solid fa-heart" /></button>
+        <button className="wishlist-heart-btn active" onClick={() => toggleWishlist(pid)} aria-label="Remove from wishlist"><Icon name="heart" className="fill-red-500" /></button>
       </div>
       <div className="wishlist-card-content">
         <Link to={`/product/${pid}`}>
@@ -69,7 +73,7 @@ export default function WishlistPage() {
     <section className="wishlist-page">
       <div className="wishlist-hero">
         <span className="section-tag">Your Collection</span>
-        <h1>My Wishlist <i className="fa-regular fa-heart" /></h1>
+        <h1>My Wishlist</h1>
         <p>Products you love, saved for later</p>
       </div>
       <div className="wishlist-grid">
