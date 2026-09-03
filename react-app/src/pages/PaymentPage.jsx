@@ -13,12 +13,64 @@ export default function PaymentPage() {
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [orderNotes, setOrderNotes] = useState('');
   const [deliveryDays, setDeliveryDays] = useState(7);
   const paymentInFlight = useRef(false);
+
+  const sanitizeName = (v) => v.replace(/[^A-Za-z ]/g, '');
+  const sanitizePhone = (v) => v.replace(/\D/g, '').slice(0, 10);
+  const sanitizePincode = (v) => v.replace(/\D/g, '').slice(0, 6);
+  const sanitizeCityState = (v) => v.replace(/[^A-Za-z ]/g, '');
+  const isValidEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+
+  const getFieldError = (field, value) => {
+    const val = (value || '').trim();
+    switch (field) {
+      case 'name':
+        if (!val) return 'Full Name is required';
+        if (!/^[A-Za-z ]+$/.test(val)) return 'Name can contain only alphabets and spaces';
+        if (val.replace(/\s+/g, ' ').length < 2) return 'Enter a valid name';
+        return '';
+      case 'phone':
+        if (!val) return 'Mobile number is required';
+        if (!/^[6-9]\d{9}$/.test(val)) return 'Enter a valid 10-digit mobile number';
+        return '';
+      case 'email':
+        if (!val) return 'Email address is required';
+        if (!isValidEmail(val)) return 'Enter a valid email address';
+        return '';
+      case 'line':
+        if (!val) return 'House / Flat No. is required';
+        return '';
+      case 'city':
+        if (!val) return 'City is required';
+        if (!/^[A-Za-z ]+$/.test(val)) return 'City can contain only alphabets and spaces';
+        return '';
+      case 'state':
+        if (!val) return 'State is required';
+        if (!/^[A-Za-z ]+$/.test(val)) return 'State can contain only alphabets and spaces';
+        return '';
+      case 'pincode':
+        if (!val) return 'PIN Code is required';
+        if (!/^\d{6}$/.test(val)) return 'Enter a valid 6-digit PIN code';
+        return '';
+      default:
+        return '';
+    }
+  };
+
+  const clearFieldError = (field) => {
+    setFieldErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -29,9 +81,9 @@ export default function PaymentPage() {
         if (!cancelled && profile) {
           setAddress(prev => ({
             ...prev,
-            name: profile.name || prev.name || '',
+            name: profile.name ? sanitizeName(profile.name).trim().replace(/\s+/g, ' ') : prev.name || '',
             email: profile.email || prev.email || '',
-            phone: profile.phone || prev.phone || '',
+            phone: profile.phone ? sanitizePhone(profile.phone) : prev.phone || '',
           }));
         }
       } catch (err) {
@@ -101,27 +153,39 @@ export default function PaymentPage() {
     });
   };
 
+  const getTrimmedAddress = () => ({
+    name: (address.name || '').trim().replace(/\s+/g, ' '),
+    phone: (address.phone || '').trim(),
+    email: (address.email || '').trim(),
+    line: (address.line || '').trim(),
+    street: (address.street || '').trim(),
+    area: (address.area || '').trim(),
+    landmark: (address.landmark || '').trim(),
+    city: (address.city || '').trim().replace(/\s+/g, ' '),
+    state: (address.state || '').trim().replace(/\s+/g, ' '),
+    pincode: (address.pincode || '').trim(),
+    address_type: address.address_type || 'home',
+  });
+
   const validateAddress = () => {
-    const required = ['name', 'email', 'phone', 'line', 'city', 'state', 'pincode'];
-    for (const field of required) {
-      if (!address[field] || !address[field].trim()) {
-        return `Please enter your ${field === 'line' ? 'address' : field === 'pincode' ? 'pincode' : field === 'phone' ? 'phone number' : field === 'email' ? 'email address' : field}`;
-      }
+    const trimmed = getTrimmedAddress();
+    const requiredFields = ['name', 'phone', 'email', 'line', 'city', 'state', 'pincode'];
+    const errors = {};
+    for (const field of requiredFields) {
+      const msg = getFieldError(field, trimmed[field]);
+      if (msg) errors[field] = msg;
     }
-    if (!/^[6-9]\d{9}$/.test(address.phone.trim())) {
-      return 'Please enter a valid 10-digit mobile number';
-    }
-    if (!/^\d{6}$/.test(address.pincode.trim())) {
-      return 'Please enter a valid 6-digit pincode';
-    }
-    if (!/^\S+@\S+\.\S+$/.test(address.email.trim())) {
-      return 'Please enter a valid email address';
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      const first = requiredFields.find((f) => errors[f]);
+      return errors[first];
     }
     return null;
   };
 
   const handlePayment = async () => {
     setError('');
+    setFieldErrors({});
 
     if (!cart.length) {
       setError('Your cart is empty. Please add items before placing an order.');
@@ -142,6 +206,7 @@ export default function PaymentPage() {
     setLoading(true);
 
     try {
+      const trimmed = getTrimmedAddress();
       const orderId = `LY${Date.now().toString().slice(-8)}${Math.floor(Math.random() * 90 + 10)}`;
       const orderData = {
         amount: finalAmount,
@@ -149,22 +214,22 @@ export default function PaymentPage() {
         receipt: orderId,
         order_id: orderId,
         customer_details: {
-          name: address.name,
-          phone: address.phone,
-          email: address.email || '',
+          name: trimmed.name,
+          phone: trimmed.phone,
+          email: trimmed.email || '',
         },
         delivery_address: {
-          full_name: address.name,
-          phone: address.phone,
-          email: address.email || '',
-          house_flat: address.line || '',
-          street: address.street || '',
-          area: address.area || '',
-          landmark: address.landmark || '',
-          city: address.city,
-          state: address.state,
-          pincode: address.pincode,
-          address_type: address.address_type || 'home',
+          full_name: trimmed.name,
+          phone: trimmed.phone,
+          email: trimmed.email || '',
+          house_flat: trimmed.line || '',
+          street: trimmed.street || '',
+          area: trimmed.area || '',
+          landmark: trimmed.landmark || '',
+          city: trimmed.city,
+          state: trimmed.state,
+          pincode: trimmed.pincode,
+          address_type: trimmed.address_type || 'home',
         },
         ordered_products: cart.map(item => ({
           product_id: item.id,
@@ -238,13 +303,14 @@ export default function PaymentPage() {
             const verifyResult = verifyResponse?.data || verifyResponse;
 
             if (verifyResult.success && verifyResult.verified) {
+              const trimmed = getTrimmedAddress();
               const order = {
                 id: orderData.order_id,
                 date: new Date().toISOString(),
                 items: cart,
                 total: finalAmount,
                 status: 'confirmed',
-                address,
+                address: trimmed,
                 delivery_address: orderData.delivery_address,
                 paymentId: razorpayResponse.razorpay_payment_id,
                 price_breakdown: orderData.price_breakdown,
@@ -278,7 +344,7 @@ export default function PaymentPage() {
                   delivery_info: orderData.delivery_info,
                   order_notes: orderNotes,
                   coupon: appliedCoupon,
-                  address,
+                  address: trimmed,
                 },
               });
             } else {
@@ -383,17 +449,70 @@ export default function PaymentPage() {
               <div className="addr-form-row">
                 <div className="addr-group">
                   <label htmlFor="name">Full Name <span className="req">*</span></label>
-                  <input id="name" type="text" placeholder="Enter your full name" value={address.name || ''} onChange={(e) => setAddress({ ...address, name: e.target.value })} />
+                  <input id="name" type="text" placeholder="Enter your full name" value={address.name || ''} maxLength={50} autoComplete="name"
+                    onChange={(e) => {
+                      const v = sanitizeName(e.target.value);
+                      setAddress({ ...address, name: v });
+                      if (fieldErrors.name) clearFieldError('name');
+                    }}
+                    onPaste={(e) => {
+                      e.preventDefault();
+                      const pasted = (e.clipboardData.getData('text') || '');
+                      const v = sanitizeName(pasted).slice(0, 50);
+                      setAddress((prev) => ({ ...prev, name: v }));
+                    }}
+                    onBlur={(e) => {
+                      const v = e.target.value.trim().replace(/\s+/g, ' ');
+                      setAddress((prev) => ({ ...prev, name: v }));
+                      const msg = getFieldError('name', v);
+                      setFieldErrors((prev) => ({ ...prev, ...(msg ? { name: msg } : { name: undefined }) }));
+                      if (!msg) clearFieldError('name');
+                      else setFieldErrors((prev) => ({ ...prev, name: msg }));
+                    }}
+                  />
+                  {fieldErrors.name && <span style={{ color: '#dc2626', fontSize: '12px', marginTop: '4px', display: 'block' }}>{fieldErrors.name}</span>}
                 </div>
                 <div className="addr-group">
                   <label htmlFor="phone">Mobile Number <span className="req">*</span></label>
-                  <input id="phone" type="tel" placeholder="10-digit mobile number" value={address.phone || ''} onChange={(e) => setAddress({ ...address, phone: e.target.value })} />
+                  <input id="phone" type="tel" inputMode="numeric" placeholder="10-digit mobile number" value={address.phone || ''} maxLength={10} autoComplete="tel"
+                    onChange={(e) => {
+                      const v = sanitizePhone(e.target.value);
+                      setAddress({ ...address, phone: v });
+                      if (fieldErrors.phone) clearFieldError('phone');
+                    }}
+                    onPaste={(e) => {
+                      e.preventDefault();
+                      const pasted = (e.clipboardData.getData('text') || '');
+                      const v = sanitizePhone(pasted);
+                      setAddress((prev) => ({ ...prev, phone: v }));
+                    }}
+                    onBlur={(e) => {
+                      const v = e.target.value.trim();
+                      const msg = getFieldError('phone', v);
+                      if (msg) setFieldErrors((prev) => ({ ...prev, phone: msg }));
+                      else clearFieldError('phone');
+                    }}
+                  />
+                  {fieldErrors.phone && <span style={{ color: '#dc2626', fontSize: '12px', marginTop: '4px', display: 'block' }}>{fieldErrors.phone}</span>}
                 </div>
               </div>
               <div className="addr-form-row">
                 <div className="addr-group addr-full">
                   <label htmlFor="email">Email Address <span className="req">*</span></label>
-                  <input id="email" type="email" placeholder="your@email.com" value={address.email || ''} onChange={(e) => setAddress({ ...address, email: e.target.value })} />
+                  <input id="email" type="email" placeholder="your@email.com" value={address.email || ''} autoComplete="email"
+                    onChange={(e) => {
+                      setAddress({ ...address, email: e.target.value });
+                      if (fieldErrors.email) clearFieldError('email');
+                    }}
+                    onBlur={(e) => {
+                      const v = e.target.value.trim();
+                      setAddress((prev) => ({ ...prev, email: v }));
+                      const msg = getFieldError('email', v);
+                      if (msg) setFieldErrors((prev) => ({ ...prev, email: msg }));
+                      else clearFieldError('email');
+                    }}
+                  />
+                  {fieldErrors.email && <span style={{ color: '#dc2626', fontSize: '12px', marginTop: '4px', display: 'block' }}>{fieldErrors.email}</span>}
                 </div>
               </div>
             </div>
@@ -403,37 +522,99 @@ export default function PaymentPage() {
               <div className="addr-form-row">
                 <div className="addr-group">
                   <label htmlFor="line">House / Flat No. <span className="req">*</span></label>
-                  <input id="line" type="text" placeholder="Flat / House No." value={address.line || ''} onChange={(e) => setAddress({ ...address, line: e.target.value })} />
+                  <input id="line" type="text" placeholder="Flat / House No." value={address.line || ''}
+                    onChange={(e) => { setAddress({ ...address, line: e.target.value }); if (fieldErrors.line) clearFieldError('line'); }}
+                    onBlur={(e) => {
+                      const v = e.target.value.trim();
+                      setAddress((prev) => ({ ...prev, line: v }));
+                      const msg = getFieldError('line', v);
+                      if (msg) setFieldErrors((prev) => ({ ...prev, line: msg })); else clearFieldError('line');
+                    }}
+                  />
+                  {fieldErrors.line && <span style={{ color: '#dc2626', fontSize: '12px', marginTop: '4px', display: 'block' }}>{fieldErrors.line}</span>}
                 </div>
                 <div className="addr-group">
                   <label htmlFor="street">Street Address</label>
-                  <input id="street" type="text" placeholder="Street name" value={address.street || ''} onChange={(e) => setAddress({ ...address, street: e.target.value })} />
+                  <input id="street" type="text" placeholder="Street name" value={address.street || ''} onChange={(e) => setAddress({ ...address, street: e.target.value })} onBlur={(e) => setAddress((prev) => ({ ...prev, street: e.target.value.trim() }))} />
                 </div>
               </div>
               <div className="addr-form-row">
                 <div className="addr-group">
                   <label htmlFor="area">Area / Locality</label>
-                  <input id="area" type="text" placeholder="Area or locality" value={address.area || ''} onChange={(e) => setAddress({ ...address, area: e.target.value })} />
+                  <input id="area" type="text" placeholder="Area or locality" value={address.area || ''} onChange={(e) => setAddress({ ...address, area: e.target.value })} onBlur={(e) => setAddress((prev) => ({ ...prev, area: e.target.value.trim() }))} />
                 </div>
                 <div className="addr-group">
                   <label htmlFor="landmark">Landmark <span className="req-optional">(Optional)</span></label>
-                  <input id="landmark" type="text" placeholder="Nearby landmark" value={address.landmark || ''} onChange={(e) => setAddress({ ...address, landmark: e.target.value })} />
+                  <input id="landmark" type="text" placeholder="Nearby landmark" value={address.landmark || ''} onChange={(e) => setAddress({ ...address, landmark: e.target.value })} onBlur={(e) => setAddress((prev) => ({ ...prev, landmark: e.target.value.trim() }))} />
                 </div>
               </div>
               <div className="addr-form-row">
                 <div className="addr-group">
                   <label htmlFor="city">City <span className="req">*</span></label>
-                  <input id="city" type="text" placeholder="City" value={address.city || ''} onChange={(e) => setAddress({ ...address, city: e.target.value })} />
+                  <input id="city" type="text" placeholder="City" value={address.city || ''} maxLength={30}
+                    onChange={(e) => {
+                      const v = sanitizeCityState(e.target.value);
+                      setAddress({ ...address, city: v });
+                      if (fieldErrors.city) clearFieldError('city');
+                    }}
+                    onPaste={(e) => {
+                      e.preventDefault();
+                      const v = sanitizeCityState(e.clipboardData.getData('text') || '').slice(0, 30);
+                      setAddress((prev) => ({ ...prev, city: v }));
+                    }}
+                    onBlur={(e) => {
+                      const v = e.target.value.trim().replace(/\s+/g, ' ');
+                      setAddress((prev) => ({ ...prev, city: v }));
+                      const msg = getFieldError('city', v);
+                      if (msg) setFieldErrors((prev) => ({ ...prev, city: msg })); else clearFieldError('city');
+                    }}
+                  />
+                  {fieldErrors.city && <span style={{ color: '#dc2626', fontSize: '12px', marginTop: '4px', display: 'block' }}>{fieldErrors.city}</span>}
                 </div>
                 <div className="addr-group">
                   <label htmlFor="state">State <span className="req">*</span></label>
-                  <input id="state" type="text" placeholder="State" value={address.state || ''} onChange={(e) => setAddress({ ...address, state: e.target.value })} />
+                  <input id="state" type="text" placeholder="State" value={address.state || ''} maxLength={30}
+                    onChange={(e) => {
+                      const v = sanitizeCityState(e.target.value);
+                      setAddress({ ...address, state: v });
+                      if (fieldErrors.state) clearFieldError('state');
+                    }}
+                    onPaste={(e) => {
+                      e.preventDefault();
+                      const v = sanitizeCityState(e.clipboardData.getData('text') || '').slice(0, 30);
+                      setAddress((prev) => ({ ...prev, state: v }));
+                    }}
+                    onBlur={(e) => {
+                      const v = e.target.value.trim().replace(/\s+/g, ' ');
+                      setAddress((prev) => ({ ...prev, state: v }));
+                      const msg = getFieldError('state', v);
+                      if (msg) setFieldErrors((prev) => ({ ...prev, state: msg })); else clearFieldError('state');
+                    }}
+                  />
+                  {fieldErrors.state && <span style={{ color: '#dc2626', fontSize: '12px', marginTop: '4px', display: 'block' }}>{fieldErrors.state}</span>}
                 </div>
               </div>
               <div className="addr-form-row">
                 <div className="addr-group addr-full">
                   <label htmlFor="pincode">PIN Code <span className="req">*</span></label>
-                  <input id="pincode" type="text" placeholder="6-digit PIN code" value={address.pincode || ''} onChange={(e) => setAddress({ ...address, pincode: e.target.value })} />
+                  <input id="pincode" type="text" inputMode="numeric" placeholder="6-digit PIN code" value={address.pincode || ''} maxLength={6}
+                    onChange={(e) => {
+                      const v = sanitizePincode(e.target.value);
+                      setAddress({ ...address, pincode: v });
+                      if (fieldErrors.pincode) clearFieldError('pincode');
+                    }}
+                    onPaste={(e) => {
+                      e.preventDefault();
+                      const v = sanitizePincode(e.clipboardData.getData('text') || '');
+                      setAddress((prev) => ({ ...prev, pincode: v }));
+                    }}
+                    onBlur={(e) => {
+                      const v = e.target.value.trim();
+                      const msg = getFieldError('pincode', v);
+                      if (msg) setFieldErrors((prev) => ({ ...prev, pincode: msg })); else clearFieldError('pincode');
+                    }}
+                  />
+                  {fieldErrors.pincode && <span style={{ color: '#dc2626', fontSize: '12px', marginTop: '4px', display: 'block' }}>{fieldErrors.pincode}</span>}
                 </div>
               </div>
             </div>
